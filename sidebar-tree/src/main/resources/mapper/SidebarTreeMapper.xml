@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.SidebarTreeMapper">
+
+    <resultMap type="com.feidian.sidebarTree.domain.SidebarTree" id="SidebarTreeResult">
+        <result property="treeId" column="tree_id"/>
+        <result property="treeName" column="tree_name"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="isShow" column="is_show"/>
+        <result property="treeType" column="tree_type"/>
+        <result property="ip" column="ip"/>
+        <result property="parentFile" column="parent_file"/>
+        <result property="shootEqmt" column="shoot_eqmt"/>
+        <result property="shootTime" column="shoot_time"/>
+        <result property="keyword" column="keyword"/>
+        <result property="procMeth" column="proc_meth"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+    </resultMap>
+
+    <sql id="selectSidebarTreeVo">
+        select tree_id, tree_name, parent_id, is_show, ip,parent_file,tree_type,shoot_eqmt,shoot_time,keyword,proc_meth, update_time,update_by,create_time,create_by
+        from sidebar_tree
+    </sql>
+
+    <select id="selectSidebarTreeList" parameterType="com.feidian.sidebarTree.domain.SidebarTree" resultMap="SidebarTreeResult">
+        <include refid="selectSidebarTreeVo"/>
+        <where>
+            <if test="treeName != null  and treeName != ''">and tree_name like concat('%', #{treeName}, '%')</if>
+            <if test="keyword != null  and keyword != ''">and sidebar_tree.keyword like concat('%', #{keyword}, '%')</if>
+            <if test="procMeth != null  and procMeth != ''">and sidebar_tree.proc_meth like concat('%', #{procMeth}, '%')</if>
+            <if test="shootEqmt != null  and shootEqmt != ''">and sidebar_tree.shoot_eqmt like concat('%', #{shootEqmt}, '%')</if>
+            <if test="shootTime != null ">and date_format(sidebar_tree.shoot_time, '%Y-%m-%d') = #{shootTime}</if>
+            <if test="parentId != null ">and parent_id = #{parentId}</if>
+            <if test="isShow != null ">and is_show = #{isShow}</if>
+            <if test="treeType != null">and tree_type = #{treeType}</if>
+            <if test="createBy != null and createBy != ''">and create_by=#{createBy}</if>
+            <if test="createTime != null">and create_time= #{createTime}</if>
+            <if test="ip != null">and ip=#{ip}</if>
+            <if test="parentFile != null and parentFile != ''">and parent_file=#{parentFile}</if>
+        </where>
+    </select>
+
+    <select id="selectSidebarTreeByTreeId" parameterType="Long" resultMap="SidebarTreeResult">
+        <include refid="selectSidebarTreeVo"/>
+        where tree_id = #{treeId}
+    </select>
+
+    <select id="selectTreeNodeByParentId" resultMap="SidebarTreeResult">
+        <include refid="selectSidebarTreeVo"/>
+        where parent_id = #{parentId} and  tree_type = #{treeType}
+    </select>
+
+    <select id="selectAllParentTreeId" resultType="java.lang.Long">
+        select parent_id from sidebar_tree where parent_id = 0;
+    </select>
+    <select id="selectAllParentTreeByParentId" resultMap="SidebarTreeResult">
+        with recursive cte(tree_id, parent_id, is_show, tree_name) as (
+            select ft.tree_id, ft.parent_id, ft.is_show, ft.tree_name
+            from sidebar_tree ft
+            where ft.tree_id = #{parentId}
+            union all
+            select t.tree_id, t.parent_id, t.is_show, t.tree_name
+            from sidebar_tree t
+                     inner join cte on cte.parent_id = t.tree_id
+            where t.parent_id != 0
+        ) select tree_id, is_show, tree_name from cte;
+
+    </select>
+
+    <insert id="insertSidebarTree" parameterType="com.feidian.sidebarTree.domain.SidebarTree" useGeneratedKeys="true" keyProperty="treeId">
+        insert into sidebar_tree
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ip != null">ip,</if>
+            <if test="parentFile != null and parentFile != ''">parent_file,</if>
+            <if test="treeName != null and treeName != ''">tree_name,</if>
+            <if test="parentId != null">parent_id,</if>
+            <if test="isShow != null">is_show,</if>
+            <if test="treeType != null">tree_type,</if>
+            <if test="shootTime!=null ">shoot_time,</if>
+            <if test="shootEqmt!=null and shootEqmt!=''">shoot_eqmt,</if>
+            <if test="procMeth!=null and procMeth!=''">proc_meth,</if>
+            <if test="keyword!=null and keyword!=''">keyword,</if>
+            <if test="createBy != null and createBy != ''">create_by,create_time</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ip != null">#{ip},</if>
+            <if test="parentFile != null and parentFile != ''">#{parentFile},</if>
+            <if test="treeName != null and treeName != ''">#{treeName},</if>
+            <if test="parentId != null">#{parentId},</if>
+            <if test="isShow != null">#{isShow},</if>
+            <if test="treeType != null">#{treeType},</if>
+            <if test="shootTime!=null and shootTime!=''">#{shootTime},</if>
+            <if test="shootEqmt!=null and shootEqmt!=''">#{shootEqmt},</if>
+            <if test="procMeth!=null and procMeth!=''">#{procMeth},</if>
+            <if test="keyword!=null and keyword!=''">#{keyword},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},NOW()</if>
+        </trim>
+    </insert>
+
+    <update id="updateSidebarTree" parameterType="com.feidian.sidebarTree.domain.SidebarTree">
+        update sidebar_tree
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="treeName != null and treeName != ''">tree_name = #{treeName},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="isShow != null">is_show = #{isShow},</if>
+            <if test="treeType != null">tree_type = #{treeType},</if>
+            <if test="ip != null">ip=#{ip},</if>
+            <if test="parentFile != null and parentFile != ''">parent_file=#{parentFile},</if>
+            shoot_time=#{shootTime},
+            shoot_eqmt=#{shootEqmt},
+            proc_meth=#{procMeth},
+            keyword=#{keyword},
+            <if test="updateBy != null and updateBy != ''">update_by=#{updateBy},update_time=NOW()</if>
+        </trim>
+        where tree_id = #{treeId}
+    </update>
+
+    <delete id="deleteSidebarTreeByTreeId" parameterType="Long">
+        delete
+        from sidebar_tree
+        where tree_id = #{treeId}
+    </delete>
+
+    <delete id="deleteSidebarTreeByTreeIds" parameterType="String">
+        delete from sidebar_tree where tree_id in
+        <foreach item="treeId" collection="array" open="(" separator="," close=")">
+            #{treeId}
+        </foreach>
+    </delete>
+</mapper>

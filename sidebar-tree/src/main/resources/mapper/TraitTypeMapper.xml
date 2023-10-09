@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.TraitTypeMapper">
+
+    <resultMap type="TraitType" id="TraitTypeResult">
+        <result property="traitTypeId"    column="trait_type_id"    />
+        <result property="traitTypeName"    column="trait_type_name"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+
+    <!--下拉框 性状类型-->
+    <select id="selectTraitTypeName" resultType="String">
+        select distinct trait_type_name
+        from trait_type
+    </select>
+
+    <!--1.5 搜索框 通过 性状类型名称 模糊匹配 查询-->
+    <select id="selectTraitType" resultMap="TraitTypeResult">
+        select *
+        from trait_type
+        where #{trait_type_name} like '%${trait_type_name}%'
+    </select>
+
+    <!--1.5-->
+    <select id="checkTraitTypeName" resultType="Integer">
+        select count(*)
+        from trait_type
+        where trait_type_name = #{trait_type_name}
+    </select>
+
+    <!--1.7 更新关联表 查询type对应的type_id-->
+    <select id="selectIdByTypeName" resultType="Long">
+        select trait_type_id
+        from trait_type
+        where trait_type_name = #{type}
+    </select>
+
+
+    <sql id="selectTraitTypeVo">
+        select trait_type_id, trait_type_name, create_by, create_time, update_by, update_time, remark from trait_type
+    </sql>
+
+    <select id="selectTraitTypeList" parameterType="TraitType" resultMap="TraitTypeResult">
+        <include refid="selectTraitTypeVo"/>
+        <where>
+            <if test="traitTypeName != null  and traitTypeName != ''"> and trait_type_name like concat('%', #{traitTypeName}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectTraitTypeByTraitTypeId" parameterType="Long" resultMap="TraitTypeResult">
+        <include refid="selectTraitTypeVo"/>
+        where trait_type_id = #{traitTypeId}
+    </select>
+
+    <insert id="insertTraitType" parameterType="TraitType">
+        insert into trait_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="traitTypeId != null">trait_type_id,</if>
+            <if test="traitTypeName != null and traitTypeName != ''">trait_type_name,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="traitTypeId != null">#{traitTypeId},</if>
+            <if test="traitTypeName != null and traitTypeName != ''">#{traitTypeName},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTraitType" parameterType="TraitType">
+        update trait_type
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="traitTypeName != null and traitTypeName != ''">trait_type_name = #{traitTypeName},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where trait_type_id = #{traitTypeId}
+    </update>
+
+    <delete id="deleteTraitTypeByTraitTypeId" parameterType="Long">
+        delete from trait_type where trait_type_id = #{traitTypeId}
+    </delete>
+
+    <delete id="deleteTraitTypeByTraitTypeIds" parameterType="String">
+        delete from trait_type where trait_type_id in
+        <foreach item="traitTypeId" collection="array" open="(" separator="," close=")">
+            #{traitTypeId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.GermplasmParentsMapper">
+
+    <resultMap type="GermplasmParents" id="GermplasmParentsResultMap">
+        <id property="id" column="id" />
+        <result property="materialId" column="material_id" />
+        <result property="father" column="father" />
+        <result property="mother" column="mother" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+    </resultMap>
+
+    <sql id="selectgetGermplasmParentsVo">
+        SELECT id, material_id, father, mother, create_by, create_time, update_by, update_time, remark
+        FROM germplasm_parents
+    </sql>
+
+    <select id="getGermplasmParentsById" parameterType="int" resultMap="GermplasmParentsResultMap">
+        SELECT id, material_id, father, mother, create_by, create_time, update_by, update_time, remark
+        FROM germplasm_parents WHERE id = #{id}
+    </select>
+
+    <select id="getAllGermplasmParents" resultMap="GermplasmParentsResultMap">
+        SELECT id, material_id, father, mother, create_by, create_time, update_by, update_time, remark
+        FROM germplasm_parents
+    </select>
+
+    <select id="getAllGermplasmParentsInfo" resultMap="GermplasmParentsResultMap">
+        SELECT material_id, father, mother
+        FROM germplasm_parents
+    </select>
+
+    <select id="findGermplasmParents" parameterType="com.feidian.sidebarTree.domain.GermplasmParents" resultMap="GermplasmParentsResultMap">
+        <include refid="selectgetGermplasmParentsVo"/>
+        <where>
+            <if test="id != null and id != 0  ">and id = #{id}  </if>
+            <if test="materialId != null and materialId != ''  ">and material_id = #{materialId} </if>
+            <if test="father != null and father != '' ">and father = #{father} </if>
+            <if test="mother != null and mother != null">and mother = #{mother} </if>
+        </where>
+    </select>
+    <select id="selectGermplasmParents" resultMap="GermplasmParentsResultMap">
+        select id, material_id, father, mother, create_by, create_time, update_by, update_time, remark from germplasm_parents where material_id = #{material_id}
+    </select>
+
+    <insert id="createGermplasmParents" parameterType="GermplasmParents">
+        INSERT INTO germplasm_parents
+        (
+        <trim suffixOverrides=",">
+            <if test="materialId != null">material_id,</if>
+            <if test="father != null">father,</if>
+            <if test="mother != null">mother,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            update_time,
+            <if test="remark != null">remark,</if>
+        </trim>
+        )
+        VALUES
+        (
+        <trim suffixOverrides=",">
+            <if test="materialId != null">#{materialId},</if>
+            <if test="father != null">#{father},</if>
+            <if test="mother != null">#{mother},</if>
+            <if test="createBy != null">#{createBy},</if>
+            NOW(),
+            <if test="updateBy != null">#{updateBy},</if>
+            NOW(),
+            <if test="remark != null">#{remark},</if>
+        </trim>
+        )
+    </insert>
+
+
+    <update id="updateGermplasmParents" parameterType="GermplasmParents">
+        UPDATE germplasm_parents
+        <set>
+            <if test="materialId != null and materialId != 0  ">material_id = #{materialId},</if>
+            <if test="father != null ">father = #{father},</if>
+            <if test="mother != null">mother = #{mother},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteGermplasmParents" parameterType="int">
+        DELETE FROM germplasm_parents WHERE id = #{id}
+    </delete>
+
+</mapper>
