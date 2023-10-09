@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.TreePictureMapper">
+
+    <resultMap type="com.feidian.sidebarTree.domain.TreePicture" id="TreePictureResult">
+        <result property="pictureId"    column="picture_id"    />
+        <result property="pictureUrl"    column="picture_url"    />
+        <result property="treeId"    column="tree_id"    />
+        <result property="isShow"    column="is_show"    />
+        <result property="shotTime" column="shot_time"/>
+        <result property="lessPictureUrl"    column="less_picture_url"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTreePictureVo">
+        select picture_id, picture_url, tree_id, is_show,shot_time,less_picture_url,create_time,update_time from tree_picture
+    </sql>
+
+    <select id="selectTreePictureList" parameterType="TreePicture" resultMap="TreePictureResult">
+        <include refid="selectTreePictureVo"/>
+        <where>
+            <if test="pictureUrl != null  and pictureUrl != ''"> and picture_url = #{pictureUrl}</if>
+            <if test="treeId != null "> and tree_id = #{treeId}</if>
+            <if test="isShow != null "> and is_show = #{isShow}</if>
+            <if test="shotTime!=null">and shot_time like concat('%', #{shotTime}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectTreePictureByPictureId" parameterType="Long" resultMap="TreePictureResult">
+        <include refid="selectTreePictureVo"/>
+        where picture_id = #{pictureId}
+    </select>
+
+    <select id="selectTreeByTreeIdAndCreateBy" resultMap="TreePictureResult" parameterType="int">
+        <include refid="selectTreePictureVo"/>
+        where tree_id = #{treeId}
+        <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
+        or tree_id = #{treeId} and is_show = 1
+    </select>
+    
+    <select id="selectTreePictureCountByTreeId" resultType="map">
+        SELECT (WITH RECURSIVE sub_tree AS (
+            SELECT tree_id FROM sidebar_tree WHERE tree_id = ss.tree_id
+            UNION ALL
+            SELECT t.tree_id FROM sidebar_tree t JOIN sub_tree s ON t.parent_id = s.tree_id
+        )
+                SELECT SUM(image_count)
+                FROM (
+                         SELECT COUNT(*) AS image_count FROM tree_picture WHERE tree_id IN (SELECT tree_id FROM sub_tree)
+                     ) t) value, ss.tree_name name FROM sidebar_tree ss WHERE parent_id = #{tree_id}
+
+    </select>
+
+    <insert id="insertTreePicture" parameterType="TreePicture" useGeneratedKeys="true" keyProperty="pictureId">
+        insert into tree_picture
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pictureUrl != null and pictureUrl != ''">picture_url,</if>
+            <if test="lessPictureUrl != null and lessPictureUrl != ''">less_picture_url,</if>
+            <if test="treeId != null">tree_id,</if>
+            <if test="isShow != null">is_show,</if>
+            <if test="createBy != null">create_by,create_time</if>
+            <if test="shotTime !=null">show_time</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="pictureUrl != null and pictureUrl != ''">#{pictureUrl},</if>
+            <if test="lessPictureUrl != null and lessPictureUrl != ''">#{lessPictureUrl},</if>
+            <if test="treeId != null">#{treeId},</if>
+            <if test="isShow != null">#{isShow},</if>
+            <if test="createBy != null">#{createBy},NOW()</if>
+            <if test="shotTime !=null">#{shotTime}</if>
+        </trim>
+    </insert>
+
+    <update id="updateTreePicture" parameterType="TreePicture">
+        update tree_picture
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pictureUrl != null and pictureUrl != ''">picture_url = #{pictureUrl},</if>
+            <if test="pictureUrl != null and pictureUrl != ''">picture_url = #{pictureUrl},</if>
+            <if test="treeId != null">tree_id = #{treeId},</if>
+            <if test="isShow != null">is_show = #{isShow},</if>
+            <if test="shotTime!=null">shot_time = #{shotTime}</if>
+        </trim>
+        where picture_id = #{pictureId}
+    </update>
+
+    <delete id="deleteTreePictureByPictureId" parameterType="Long">
+        delete from tree_picture where picture_id = #{pictureId}
+    </delete>
+
+    <delete id="deleteTreePictureByPictureIds" parameterType="String">
+        delete from tree_picture where picture_id in
+        <foreach item="pictureId" collection="array" open="(" separator="," close=")">
+            #{pictureId}
+        </foreach>
+    </delete>
+</mapper>

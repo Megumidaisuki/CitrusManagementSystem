@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.TraitMapper">
+
+    <resultMap type="Trait" id="TraitResult">
+        <result property="traitId"    column="trait_id"    />
+        <result property="traitName"    column="trait_name"    />
+        <result property="fullName"    column="full_name"    />
+        <result property="abbreviationName"    column="abbreviation_name"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <!--1.6 大查询 模糊匹配 根据性状名称模糊匹配-->
+    <select id="selectTrait" resultMap="TraitResult">
+        select *
+        from trait
+        where trait_name like '%${trait_name}%'
+          and isdeleted != 1
+    </select>
+
+    <!--1.6-->
+    <select id="checkTraitName" resultType="Integer">
+        select count(*)
+        from trait
+        where trait_name = #{trait_name}
+    </select>
+
+    <sql id="selectTraitVo">
+        select trait_id, trait_name, full_name, abbreviation_name, create_by, create_time, update_by, update_time, remark, isdeleted from trait
+    </sql>
+
+    <select id="selectTraitList" parameterType="Trait" resultMap="TraitResult">
+        <include refid="selectTraitVo"/>
+        <where>
+            <if test="traitName != null  and traitName != ''"> and trait_name like concat('%', #{traitName}, '%')</if>
+            <if test="fullName != null  and fullName != ''"> and full_name like concat('%', #{fullName}, '%')</if>
+            <if test="abbreviationName != null "> and abbreviation_name like concat('%', #{abbreviationName}, '%')</if>
+            and isdeleted != 1
+        </where>
+    </select>
+
+    <select id="selectTraitListWithoutDeleted" parameterType="Trait" resultMap="TraitResult">
+        <include refid="selectTraitVo"/>
+        <where>
+            <if test="traitName != null  and traitName != ''"> and trait_name like concat('%', #{traitName}, '%')</if>
+            <if test="fullName != null  and fullName != ''"> and full_name like concat('%', #{fullName}, '%')</if>
+            <if test="abbreviationName != null "> and abbreviation_name like concat('%', #{abbreviationName}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectTraitByTraitId" parameterType="Long" resultMap="TraitResult">
+        <include refid="selectTraitVo"/>
+        where trait_id = #{traitId}
+        and isdeleted != 1
+    </select>
+
+    <select id="selectTraitByTraitIdWithoutDeleted" parameterType="Long" resultMap="TraitResult">
+        <include refid="selectTraitVo"/>
+        where trait_id = #{traitId}
+    </select>
+
+    <insert id="insertTrait" parameterType="Trait" useGeneratedKeys="true" keyProperty="traitId">
+        insert into trait
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="traitName != null and traitName != ''">trait_name,</if>
+            <if test="fullName != null and fullName != ''">full_name,</if>
+            <if test="abbreviationName != null">abbreviation_name,</if>
+            <if test="createBy != null and createBy != ''">create_by,create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="traitName != null and traitName != ''">#{traitName},</if>
+            <if test="fullName != null and fullName != ''">#{fullName},</if>
+            <if test="abbreviationName != null">#{abbreviationName},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},NOW(),</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},NOW(),</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateTrait" parameterType="Trait">
+        update trait
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="traitName != null and traitName != ''">trait_name = #{traitName},</if>
+            <if test="fullName != null and fullName != ''">full_name = #{fullName},</if>
+            <if test="abbreviationName != null">abbreviation_name = #{abbreviationName},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},create_time = NOW(),</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},update_time = NOW(),</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where trait_id = #{traitId}
+    </update>
+
+    <delete id="deleteTraitByTraitId" parameterType="Long">
+        update trait set isdeleted = 1 where trait_id = #{traitId}
+    </delete>
+
+    <delete id="deleteTraitByTraitIds" parameterType="String">
+        UPDATE trait
+        SET isdeleted = 1
+        WHERE trait_id IN
+        <foreach item="traitId" collection="array" open="(" separator="," close=")">
+            #{traitId}
+        </foreach>
+    </delete>
+</mapper>

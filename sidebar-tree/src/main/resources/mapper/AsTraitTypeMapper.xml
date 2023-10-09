@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.AsTraitTypeMapper">
+
+    <resultMap type="AsTraitType" id="AsTraitTypeResult">
+        <result property="asTraitTypeId"    column="as_trait_type_id"    />
+        <result property="traitTypeId"    column="trait_type_id"    />
+        <result property="traitId"    column="trait_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap type="com.feidian.sidebarTree.domain.Trait" id="TraitResult">
+        <result property="traitId" column="trait_id"/>
+        <result property="traitName" column="trait_name"/>
+        <result property="fullName" column="full_name"/>
+        <result property="abbreviationName" column="abbreviation_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <!--1.7 模糊匹配性状名称-->
+    <select id="selectTraitName" resultType="String">
+        select distinct trait_name
+        from as_trait_type AT,
+             trait T
+        where AT.trait_id = T.trait_id
+            and (( #{trait_name} is not null and #{trait_name} != '' and T.trait_name like concat('%', #{trait_name}, '%'))
+            or ( #{trait_name} = '' or #{trait_name} is null ) )
+    </select>
+
+
+    <!--1.7 大查询 多表查询 返回需要高亮的数据-->
+    <select id="selectHighlight" resultMap="TraitResult">
+        select distinct T.trait_id,
+                        T.trait_name,
+                        T.full_name,
+                        T.abbreviation_name,
+                        T.create_by,
+                        T.create_time,
+                        T.update_by,
+                        T.update_time,
+                        T.remark
+        from as_trait_type AT,
+             trait_type TT,
+             trait T
+        where
+           AT.trait_type_id = TT.trait_type_id
+          and AT.trait_id = T.trait_id
+          and ((TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
+                T.trait_name like concat('%', #{name}, '%') and #{name} != '' and #{name} is not null)
+            or ((#{type} = '' or #{type} is null) and T.trait_name like concat('%', #{name}, '%') and
+                #{name} != '' and #{name} is not null)
+            or (TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
+                (#{name} = '' or #{name} is null))
+            )
+
+        union
+
+        select distinct trait_id,
+                        trait_name,
+                        full_name,
+                        abbreviation_name,
+                        create_by,
+                        create_time,
+                        update_by,
+                        update_time,
+                        remark
+        from trait
+        where
+             trait_id not in (
+            select distinct T.trait_id
+            from as_trait_type AT,
+                 trait_type TT,
+                 trait T
+            where AT.trait_type_id = TT.trait_type_id
+              and AT.trait_id = T.trait_id
+              and ((TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
+                    T.trait_name like concat('%', #{name}, '%') and #{name} != '' and #{name} is not null)
+                or ((#{type} = '' or #{type} is null) and T.trait_name like concat('%', #{name}, '%') and
+                    #{name} != '' and #{name} is not null)
+                or (TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
+                    (#{name} = '' or #{name} is null))
+                )
+        )
+    </select>
+
+    <!-- -->
+    <select id="selectHighlightin" resultMap="TraitResult">
+        select distinct T.trait_id,
+                        T.trait_name,
+                        T.full_name,
+                        T.abbreviation_name,
+                        T.create_by,
+                        T.create_time,
+                        T.update_by,
+                        T.update_time,
+                        T.remark
+        from as_trait_type AT,
+             trait_type TT,
+             trait T
+        where
+           AT.trait_type_id = TT.trait_type_id
+          and AT.trait_id = T.trait_id
+
+          and ((TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
+                T.trait_name like concat('%', #{name}, '%') and #{name} != '' and #{name} is not null)
+            or ((#{type} = '' or #{type} is null) and T.trait_name like concat('%', #{name}, '%') and
+                #{name} != '' and #{name} is not null)
+            or (TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
+                (#{name} = '' or #{name} is null))
+            )
+    </select>
+
+    <!--1.7 更新关联表中的数据-->
+    <delete id="CheckUpdate">
+        DELETE
+        FROM as_trait_type
+        WHERE as_trait_type_id IN (
+            SELECT temp.as_trait_type_id
+            FROM (
+                     SELECT AT.as_trait_type_id
+                     FROM trait_type TT
+                              INNER JOIN as_trait_type AT ON TT.trait_type_id = AT.trait_type_id
+                     WHERE AT.trait_id = #{trait_id}
+                       AND TT.trait_type_name = #{type}
+                 ) AS temp
+        )
+    </delete>
+
+    <sql id="selectAsTraitTypeVo">
+        select as_trait_type_id, trait_type_id, trait_id, create_by, create_time, update_by, update_time, remark from as_trait_type
+    </sql>
+
+    <select id="selectAsTraitTypeList" parameterType="AsTraitType" resultMap="AsTraitTypeResult">
+        <include refid="selectAsTraitTypeVo"/>
+        <where>
+            <if test="traitTypeId != null "> and trait_type_id = #{traitTypeId}</if>
+            <if test="traitId != null  and traitId != ''"> and trait_id = #{traitId}</if>
+        </where>
+    </select>
+
+    <select id="selectAsTraitTypeByAsTraitTypeId" parameterType="Long" resultMap="AsTraitTypeResult">
+        <include refid="selectAsTraitTypeVo"/>
+        where as_trait_type_id = #{asTraitTypeId}
+    </select>
+
+    <insert id="insertAsTraitType" parameterType="AsTraitType" useGeneratedKeys="true" keyProperty="asTraitTypeId">
+        insert into as_trait_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="traitTypeId != null">trait_type_id,</if>
+            <if test="traitId != null and traitId != ''">trait_id,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="traitTypeId != null">#{traitTypeId},</if>
+            <if test="traitId != null and traitId != ''">#{traitId},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAsTraitType" parameterType="AsTraitType">
+        update as_trait_type
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="traitTypeId != null">trait_type_id = #{traitTypeId},</if>
+            <if test="traitId != null and traitId != ''">trait_id = #{traitId},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where as_trait_type_id = #{asTraitTypeId}
+    </update>
+
+    <delete id="deleteAsTraitTypeByAsTraitTypeId" parameterType="Long">
+        delete from as_trait_type where as_trait_type_id = #{asTraitTypeId}
+    </delete>
+
+    <delete id="deleteAsTraitTypeByAsTraitTypeIds" parameterType="String">
+        delete from as_trait_type where as_trait_type_id in
+        <foreach item="asTraitTypeId" collection="array" open="(" separator="," close=")">
+            #{asTraitTypeId}
+        </foreach>
+    </delete>
+</mapper>

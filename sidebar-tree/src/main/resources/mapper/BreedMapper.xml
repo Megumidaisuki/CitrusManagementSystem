@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.BreedMapper">
+    
+    <resultMap type="Breed" id="BreedResult">
+        <result property="breedId"    column="breed_id"    />
+        <result property="genofileId"    column="genofile_id"    />
+        <result property="phenofileId"    column="phenofile_id"    />
+        <result property="breedUrl"    column="breed_url"    />
+        <result property="scene"    column="scene"    />
+        <result property="status"    column="status"    />
+        <result property="submitTime"    column="submit_time"    />
+        <result property="finishTime"    column="finish_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="phenofileFlag"    column="phenofile_flag"    />
+        <result property="genofileFlag"    column="genofile_flag"    />
+        <result property="genofile"    column="genofile"    />
+        <result property="phenofile"    column="phenofile"    />
+        <result property="result"    column="result"    />
+        <result property="models"    column="models"    />
+    </resultMap>
+
+    <sql id="selectBreedVo">
+        select breed_id, genofile_id, phenofile_id, breed_url, scene, status, submit_time, finish_time, create_by, create_time, update_by, update_time, remark,genofile,phenofile,result,models from breed
+    </sql>
+
+    <select id="selectBreedList" parameterType="Breed" resultMap="BreedResult">
+        <include refid="selectBreedVo"/>
+        <where>  
+            <if test="genofileId != null "> and genofile_id = #{genofileId}</if>
+            <if test="phenofileId != null "> and phenofile_id = #{phenofileId}</if>
+            <if test="breedUrl != null  and breedUrl != ''"> and breed_url = #{breedUrl}</if>
+            <if test="scene != null "> and scene = #{scene}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="submitTime != null "> and submit_time = #{submitTime}</if>
+            <if test="finishTime != null "> and finish_time = #{finishTime}</if>
+            <if test="genofile != null "> and finish_time = #{genofile}</if>
+            <if test="phenofile != null "> and finish_time = #{phenofile}</if>
+        </where>
+        ORDER BY breed_id DESC
+    </select>
+    
+    <select id="selectBreedByBreedId" parameterType="Long" resultMap="BreedResult">
+        <include refid="selectBreedVo"/>
+        where breed_id = #{breedId}
+    </select>
+<!--    插入后获取id-->
+    <insert id="insertBreed" parameterType="Breed" useGeneratedKeys="true" keyProperty="breedId" >
+        insert into breed
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="breedId != null">breed_id,</if>
+            <if test="genofileId != null">genofile_id,</if>
+            <if test="phenofileId != null">phenofile_id,</if>
+            <if test="breedUrl != null">breed_url,</if>
+            <if test="scene != null">scene,</if>
+            <if test="status != null">status,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="finishTime != null">finish_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="phenofileFlag != null">genofile_flag,</if>
+            <if test="genofileFlag != null">phenofile_flag,</if>
+            <if test="phenofile != null">phenofile,</if>
+            <if test="genofile != null">genofile,</if>
+            <if test="result != null">result,</if>
+            <if test="models != null">models,</if>
+
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="breedId != null">#{breedId},</if>
+            <if test="genofileId != null">#{genofileId},</if>
+            <if test="phenofileId != null">#{phenofileId},</if>
+            <if test="breedUrl != null">#{breedUrl},</if>
+            <if test="scene != null">#{scene},</if>
+            <if test="status != null">#{status},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="finishTime != null">#{finishTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="phenofileFlag != null">#{phenofileFlag},</if>
+            <if test="genofileFlag != null">#{genofileFlag},</if>
+            <if test="phenofile != null">#{phenofile},</if>
+            <if test="genofile != null">#{genofile},</if>
+            <if test="result != null">#{result},</if>
+            <if test="models != null">#{models},</if>
+         </trim>
+    </insert>
+
+    <insert id="inserPhenotypeFile" useGeneratedKeys="true" keyProperty="fileId">
+        insert into phenotype_file(url) values(#{uploadFilePath})
+    </insert>
+
+    <insert id="inserGenotypeFile" useGeneratedKeys="true" keyProperty="fileId" >
+        insert into genotype_file(url) values(#{uploadFilePath})
+    </insert>
+
+    <select id="getLastInsertedFileId" resultType="java.lang.Long">
+        select last_insert_id()
+    </select>
+    <select id="selectBreedPhenotypeFile" resultType="java.lang.String">
+        select url from phenotype_file where file_id = #{fileId}
+    </select>
+    <select id="selectBreedGenotypeFile" resultType="java.lang.String">
+        select url from genotype_file where file_id = #{fileId}
+    </select>
+    <select id="selectBreedPhenotypeNewFile" resultType="java.lang.String">
+        select table_name from phenotype_file where file_id = #{fileId}
+    </select>
+    <select id="selectBreedGenotypeNewFile" resultType="java.lang.String">
+        select table_name from genotype_file where file_id = #{fileId}
+    </select>
+    <select id="getCount" resultType="java.lang.Integer">
+        select MAX(breed_id) from breed
+    </select>
+
+    <update id="updateBreed" parameterType="Breed">
+        update breed
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="genofileId != null">genofile_id = #{genofileId},</if>
+            <if test="phenofileId != null">phenofile_id = #{phenofileId},</if>
+            <if test="breedUrl != null">breed_url = #{breedUrl},</if>
+            <if test="scene != null">scene = #{scene},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="finishTime != null">finish_time = #{finishTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="result != null">result = #{result},</if>
+            <if test="models != null">models = #{models},</if>
+        </trim>
+        where breed_id = #{breedId}
+    </update>
+
+    <delete id="deleteBreedByBreedId" parameterType="Long">
+        delete from breed where breed_id = #{breedId}
+    </delete>
+
+    <delete id="deleteBreedByBreedIds" parameterType="String">
+        delete from breed where breed_id in 
+        <foreach item="breedId" collection="array" open="(" separator="," close=")">
+            #{breedId}
+        </foreach>
+    </delete>
+</mapper>

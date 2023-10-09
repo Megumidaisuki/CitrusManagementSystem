@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.GenotypeFileMapper">
+
+    <resultMap type="GenotypeFile" id="GenotypeFileResult">
+        <result property="fileId"    column="file_id"    />
+        <result property="fileName"    column="file_name"    />
+        <result property="tableName"    column="table_name"    />
+        <result property="treeId"    column="tree_id"    />
+        <result property="chrom"    column="chrom"    />
+        <result property="position"    column="position"    />
+        <result property="status"    column="status"    />
+        <result property="url"    column="url"    />
+        <result property="tableNum"    column="table_num"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectGenotypeFileVo">
+        select file_id, file_name, table_name, tree_id, chrom, position, status, url, table_num, create_by, create_time, update_by, update_time, remark from genotype_file
+    </sql>
+
+    <select id="selectGenotypeFileList" parameterType="GenotypeFile" resultMap="GenotypeFileResult">
+        <include refid="selectGenotypeFileVo"/>
+        <where>
+            tree_id != -1
+            <if test="fileId != null "> and file_id = #{fileId}</if>
+            <if test="fileName != null  and fileName != ''"> and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="tableName != null  and tableName != ''"> and table_name like concat('%', #{tableName}, '%')</if>
+            <if test="treeId != null "> and tree_id = #{treeId}</if>
+            <if test="chrom != null  and chrom != ''"> and chrom = #{chrom}</if>
+            <if test="position != null "> and position = #{position}</if>
+            <if test="url != null  and url != ''"> and url = #{url}</if>
+            <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
+            <if test="fileName == '' and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
+            <if test="fileName == null and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
+        </where>
+    </select>
+
+    <select id="selectGenotypeFileStringList" parameterType="GenotypeFile" resultType="java.lang.String">
+        select distinct table_name from genotype_file
+        <where>
+            tree_id != -1
+            <if test="fileId != null "> and file_id = #{fileId}</if>
+            <if test="fileName != null  and fileName != ''"> and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="tableName != null  and tableName != ''"> and table_name like concat('%', #{tableName}, '%')</if>
+            <if test="treeId != null "> and tree_id = #{treeId}</if>
+            <if test="chrom != null  and chrom != ''"> and chrom = #{chrom}</if>
+            <if test="position != null "> and position = #{position}</if>
+            <if test="url != null  and url != ''"> and url = #{url}</if>
+            <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
+            <if test="fileName == '' and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
+            <if test="fileName == null and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
+        </where>
+    </select>
+
+    <select id="selectGenotypeFileByFileId" parameterType="Long" resultMap="GenotypeFileResult">
+        <include refid="selectGenotypeFileVo"/>
+        where file_id = #{fileId} and tree_id != -1
+    </select>
+
+    <insert id="insertGenotypeFile" parameterType="GenotypeFile" useGeneratedKeys="true" keyProperty="fileId">
+        insert into genotype_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fileName != null">file_name,</if>
+            <if test="tableName != null and tableName != ''">table_name,</if>
+            <if test="treeId != null">tree_id,</if>
+            <if test="chrom != null">chrom,</if>
+            <if test="position != null">position,</if>
+            <if test="status != null">status,</if>
+            <if test="url != null">url,</if>
+            <if test="tableNum != null">table_num,</if>
+            <if test="createBy != null">create_by,create_time,</if>
+            <if test="updateBy != null">update_by,update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fileName != null">#{fileName},</if>
+            <if test="tableName != null and tableName != ''">#{tableName},</if>
+            <if test="treeId != null">#{treeId},</if>
+            <if test="chrom != null">#{chrom},</if>
+            <if test="position != null">#{position},</if>
+            <if test="status != null">#{status},</if>
+            <if test="url != null">#{url},</if>
+            <if test="tableNum != null">#{tableNum},</if>
+            <if test="createBy != null">#{createBy},NOW(),</if>
+            <if test="updateBy != null">#{updateBy},NOW(),</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateGenotypeFile" parameterType="GenotypeFile">
+        update genotype_file
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="tableName != null and tableName != ''">table_name = #{tableName},</if>
+            <if test="treeId != null">tree_id = #{treeId},</if>
+            <if test="chrom != null">chrom = #{chrom},</if>
+            <if test="position != null">position = #{position},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="tableNum != null">table_num = #{tableNum},</if>
+            <if test="createBy != null">create_by = #{createBy},create_time = NOW(),</if>
+            <if test="updateBy != null">update_by = #{updateBy},update_time = NOW(),</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where file_id = #{fileId}
+    </update>
+
+    <delete id="deleteGenotypeFileByFileId" parameterType="Long">
+        delete from genotype_file where file_id = #{fileId}
+    </delete>
+
+    <delete id="deleteGenotypeFileByFileIds" parameterType="String">
+        delete from genotype_file where file_id in
+        <foreach item="fileId" collection="array" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </delete>
+    <delete id="deleteExportFileByTableName">
+        delete from genotype_file where table_name = #{tableName} and tree_id = -1
+    </delete>
+    <delete id="deleteGenotypeFileByTableName">
+        delete from genotype_file where table_name = #{tableName}
+    </delete>
+
+    <select id="selectLatestGenotypeFileByTableName" resultMap="GenotypeFileResult">
+        select * from genotype_file where file_id = (select max(file_id) from genotype_file where table_name = #{tableName} and tree_id != -1)
+    </select>
+    <select id="selectMaxGenotypeIdByTableName" resultType="java.lang.Long">
+        select max(genotype_id) from ${tableName};
+    </select>
+    <select id="selectAllSortedColumnByTableName" resultType="java.lang.String">
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = #{tableName}
+        ORDER BY ORDINAL_POSITION;
+    </select>
+    <select id="selectTableColumnCountByTableName" resultType="java.lang.Integer">
+        SELECT COUNT(COLUMN_NAME)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = #{tableName}
+    </select>
+    <select id="selectTableLineCountByTableName" resultType="java.lang.Long">
+        select count(*) from ${tableName};
+    </select>
+    <select id="selectDetailByTableName" resultType="java.util.LinkedHashMap">
+        select * from ${tableName}
+    </select>
+    <select id="selectExportFileUrlByTableName" resultType="java.lang.String">
+        select url from genotype_file where table_name = ${tableName} and tree_id = -1
+    </select>
+
+    <select id="selectFileNameByFileId" parameterType="String" resultType="String">
+        select url
+        from genotype_file
+        where file_id = #{fileId}
+    </select>
+    <select id="selectGenotypeFileListCountByTableName" resultType="java.lang.Long">
+        select count(*) from genotype_file where table_name = #{tableName} and tree_id != -1
+    </select>
+    <select id="selectChromDensityByTableName" resultType="java.util.Map">
+        select  chrom,
+                floor(position/#{intervalSize}) as 'interval',
+                count(*) as 'count'
+        from ${tableName}
+        group by chrom, floor(position/#{intervalSize}) * #{intervalSize}, floor(position/#{intervalSize}) * #{intervalSize} + #{intervalSize} - 1
+        order by cast(replace(chrom,'chr','') as unsigned)
+    </select>
+    <select id="selectChromRatioByTableName" resultType="java.util.Map">
+        select  chrom,
+                count(*)/every as 'ratio',
+                min(position) as 'min',
+                max(position) as 'max'
+        from ${tableName},
+             (select count(*) as 'every' from ${tableName}) as every
+        group by chrom
+        order by cast(replace(chrom,'chr','') as unsigned)
+    </select>
+    <select id="selectBasicInfoByTableName" resultType="java.util.LinkedHashMap">
+        select genotype_id, chrom, `position`, id, ref, alt from ${tableName}
+        where chrom = #{chrom}
+          and `position` &lt;= #{end}
+          and `position` &gt;= #{start}
+    </select>
+    <select id="selectMaterialInfo" resultType="java.util.Map">
+        select genotype_id,
+               ${materialName} as 'material'
+        from ${tableName}
+    </select>
+    <select id="selectHeatMapInfoByTableName" resultType="java.util.Map">
+        select genotype_id,
+               ${columParam}
+        from ${tableName}
+    </select>
+</mapper>
+

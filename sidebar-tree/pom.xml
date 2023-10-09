@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ruoyi</artifactId>
+        <groupId>com.ruoyi</groupId>
+        <version>3.8.3</version>
+        <relativePath/>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.feidian</groupId>
+    <artifactId>sidebar-tree</artifactId>
+    <version>1.0.0</version>
+    <dependencies>
+        <dependency>
+            <groupId>com.feidian</groupId>
+            <artifactId>feidian-common</artifactId>
+            <version>3.8.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.feidian</groupId>
+            <artifactId>feidian-framework</artifactId>
+            <version>3.8.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.javacsv</groupId>
+            <artifactId>javacsv</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.6</version> <!-- 使用最新的版本 -->
+        </dependency>
+
+
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.17</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.python</groupId>
+            <artifactId>jython-standalone</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.junrar</groupId>
+            <artifactId>junrar</artifactId>
+            <version>7.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.lingala</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>1.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.sevenzipjbinding</groupId>
+            <artifactId>sevenzipjbinding</artifactId>
+            <version>16.02-2.01</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.sevenzipjbinding</groupId>
+            <artifactId>sevenzipjbinding-all-platforms</artifactId>
+            <version>16.02-2.01</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>ma.glasnost.orika</groupId>
+            <artifactId>orika-core</artifactId>
+            <version>1.5.4</version><!-- or latest version -->
+        </dependency>
+        <dependency>
+            <groupId>com.github.samtools</groupId>
+            <artifactId>htsjdk</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-cells</artifactId>
+            <version>22.6</version>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>AsposeJavaAPI</id>
+            <name>Aspose Java API</name>
+            <url>https://repository.aspose.com/repo/</url>
+        </repository>
+    </repositories>
+    <properties>
+        <maven.compiler.source>16</maven.compiler.source>
+        <maven.compiler.target>16</maven.compiler.target>
+    </properties>
+
+</project>

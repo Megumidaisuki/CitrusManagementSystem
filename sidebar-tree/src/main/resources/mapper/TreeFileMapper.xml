@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.TreeFileMapper">
+
+    <resultMap type="TreeFile" id="TreeFileResult">
+        <result property="fileId"    column="file_id"    />
+        <result property="fileUrl"    column="file_url"    />
+        <result property="treeId"    column="tree_id"    />
+        <result property="description"    column="description"    />
+        <result property="fileStatus"    column="file_status"    />
+        <result property="fileName"    column="file_name"    />
+        <result property="dateTime" column="date_time" />
+        <result property="createTime" column="create_time" />
+        <result property="createBy" column="create_by" />
+        <result property="updateBy" column="create_by" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="selectTreeFileVo">
+        select file_id, file_url, tree_id, description, file_status, file_name, date_time ,update_time,update_by,create_by,create_time from tree_file
+    </sql>
+
+    <select id="getFile" parameterType="Integer" resultMap="TreeFileResult">
+        <include refid="selectTreeFileVo"/>
+        where file_id=#{id}
+    </select>
+
+    <select id="selectTreeFileList" parameterType="TreeFile" resultMap="TreeFileResult">
+        <include refid="selectTreeFileVo"/>
+        <where>
+            <if test="fileId != null and fileId != ''">and file_id = #{fileId}</if>
+            <if test="fileUrl != null  and fileUrl != ''"> and file_url = #{fileUrl}</if>
+            <if test="treeId != null "> and tree_id = #{treeId}</if>
+            <if test="description != null  and description != ''"> and description like concat('%',#{description},'%')</if>
+            <if test="fileStatus != null and fileStatus != ''"> and file_status = #{fileStatus}</if>
+            <if test="fileName != null  and fileName != ''"> and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="createBy != null and createBy != ''">and create_by=#{createBy}</if>
+            <if test="createTime != null and createTime != ''">and create_time= #{createTime}</if>
+        </where>
+    </select>
+
+    <select id="selectTreeFileByFileId" parameterType="Long" resultMap="TreeFileResult">
+        <include refid="selectTreeFileVo"/>
+        where file_id = #{fileId}
+    </select>
+    <select id="getFileUrl" resultType="java.lang.String" parameterType="int">
+        select file_url from tree_file where file_id = #{id}
+    </select>
+    <select id="findCsvSortByTime" resultMap="TreeFileResult" parameterType="int">
+        <include refid="selectTreeFileVo"/>
+        WHERE
+        tree_id = #{treeId}
+        AND file_url LIKE "%csv"
+        ORDER BY
+        date_time ASC
+    </select>
+
+    <insert id="insertTreeFile" parameterType="TreeFile" useGeneratedKeys="true" keyProperty="fileId">
+        insert into tree_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fileUrl != null and fileUrl != ''">file_url,</if>
+            <if test="treeId != null">tree_id,</if>
+            <if test="description != null">description,</if>
+            <if test="fileStatus != null">file_status,</if>
+            <if test="fileName != null and fileName != ''">file_name,</if>
+            <if test="dateTime != null and dateTime != ''">date_time,</if>
+            <if test="createBy != null and createBy != ''">create_by,create_time</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fileUrl != null and fileUrl != ''">#{fileUrl},</if>
+            <if test="treeId != null">#{treeId},</if>
+            <if test="description != null">#{description},</if>
+            <if test="fileStatus != null">#{fileStatus},</if>
+            <if test="fileName != null and fileName != ''">#{fileName},</if>
+            <if test="dateTime != null and dateTime != ''">#{dateTime},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},NOW()</if>
+         </trim>
+    </insert>
+
+    <update id="updateTreeFile" parameterType="TreeFile">
+        update tree_file
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fileUrl != null and fileUrl != ''">file_url = #{fileUrl},</if>
+            <if test="treeId != null">tree_id = #{treeId},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="fileStatus != null">file_status = #{fileStatus},</if>
+            <if test="fileName != null and fileName != ''">file_name = #{fileName},</if>
+            <if test="dateTime != null and dateTime != ''">date_time = #{dateTime},</if>
+            <if test="updateBy != null and updateBy != ''">update_by=#{updateBy},update_time=NOW()</if>
+        </trim>
+        where file_id = #{fileId}
+    </update>
+
+    <delete id="deleteTreeFileByFileId" parameterType="Long">
+        delete from tree_file where file_id = #{fileId}
+    </delete>
+
+    <delete id="deleteTreeFileByFileIds" parameterType="String">
+        delete from tree_file where file_id in
+        <foreach item="fileId" collection="array" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </delete>
+</mapper>

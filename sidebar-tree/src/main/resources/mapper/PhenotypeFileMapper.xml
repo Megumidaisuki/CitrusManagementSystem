@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.PhenotypeFileMapper">
+
+    <resultMap type="PhenotypeFile" id="PhenotypeFileResult">
+        <result property="fileId" column="file_id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="tableName" column="table_name"/>
+        <result property="treeId" column="tree_id"/>
+        <result property="speciesId" column="species_id"/>
+        <result property="populationId" column="population_id"/>
+        <result property="status" column="status"/>
+        <result property="year" column="year"/>
+        <result property="location" column="location"/>
+        <result property="url" column="url"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <resultMap type="Phenotype" id="PhenotypeResult">
+        <result property="populationId" column="population_id"/>
+        <result property="year" column="year"/>
+        <result property="location" column="location"/>
+        <result property="repeat" column="repeat"/>
+        <result property="kindId" column="kind_id"/>
+        <result property="kindName" column="kind_name"/>
+        <result property="materialId" column="material_id"/>
+        <result property="fieldId" column="field_id"/>
+        <result property="controlType" column="control_type"/>
+        <result property="father" column="father"/>
+        <result property="mother" column="mother"/>
+        <result property="traitId" column="trait_id"/>
+        <result property="traitValue" column="trait_value"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectPhenotypeFileVo">
+        select file_id,
+               file_name,
+               table_name,
+               tree_id,
+               species_id,
+               population_id,
+               status,
+               year,
+               location,
+               url,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from phenotype_file
+    </sql>
+
+    <select id="selectPhenotypeFileList" parameterType="PhenotypeFile" resultMap="PhenotypeFileResult">
+        <include refid="selectPhenotypeFileVo"/>
+        <where>
+            tree_id != -1
+            <if test="fileId != null ">and file_id = #{fileId}</if>
+            <if test="fileName != null  and fileName != ''">and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="tableName != null  and tableName != ''">and table_name like concat('%', #{tableName}, '%')</if>
+            <if test="treeId != null ">and tree_id = #{treeId}</if>
+            <if test="speciesId != null ">and species_id = #{speciesId}</if>
+            <if test="populationId != null ">and population_id = #{populationId}</if>
+            <if test="year != null  and year != ''">and year = #{year}</if>
+            <if test="location != null  and location != ''">and location = #{location}</if>
+            <if test="url != null  and url != ''">and url = #{url}</if>
+            <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
+            <if test="fileName == '' and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
+            <if test="fileName == null and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
+        </where>
+    </select>
+
+    <select id="selectPhenotypeFileListCountList" parameterType="PhenotypeFile" resultType="java.lang.String">
+        select distinct table_name from phenotype_file
+        <where>
+            tree_id != -1
+            <if test="fileId != null ">and file_id = #{fileId}</if>
+            <if test="fileName != null  and fileName != ''">and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="tableName != null  and tableName != ''">and table_name like concat('%', #{tableName}, '%')</if>
+            <if test="treeId != null ">and tree_id = #{treeId}</if>
+            <if test="speciesId != null ">and species_id = #{speciesId}</if>
+            <if test="populationId != null ">and population_id = #{populationId}</if>
+            <if test="year != null  and year != ''">and year = #{year}</if>
+            <if test="location != null  and location != ''">and location = #{location}</if>
+            <if test="url != null  and url != ''">and url = #{url}</if>
+            <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
+            <if test="fileName == '' and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
+            <if test="fileName == null and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
+        </where>
+    </select>
+
+    <select id="selectPhenotypeFileByFileId" parameterType="Long" resultMap="PhenotypeFileResult">
+        <include refid="selectPhenotypeFileVo"/>
+        where file_id = #{fileId}
+    </select>
+
+    <select id="selectAll" parameterType="PhenotypeFile" resultMap="PhenotypeFileResult">
+        <include refid="selectPhenotypeFileVo"/>
+    </select>
+    <insert id="insertPhenotypeFile" parameterType="PhenotypeFile" useGeneratedKeys="true" keyProperty="fileId">
+        insert into phenotype_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fileId != null">file_id,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="tableName != null">table_name,</if>
+            <if test="treeId != null">tree_id,</if>
+            <if test="speciesId != null">species_id,</if>
+            <if test="populationId != null">population_id,</if>
+            <if test="status != null">status,</if>
+            <if test="year != null">year,</if>
+            <if test="location != null">location,</if>
+            <if test="url != null">url,</if>
+            <if test="createBy != null">create_by,create_time,</if>
+            <if test="remark != null">remark</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fileId != null">#{fileId},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="tableName != null">#{tableName},</if>
+            <if test="treeId != null">#{treeId},</if>
+            <if test="speciesId != null">#{speciesId},</if>
+            <if test="populationId != null">#{populationId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="year != null">#{year},</if>
+            <if test="location != null">#{location},</if>
+            <if test="url != null">#{url},</if>
+            <if test="createBy != null">#{createBy},NOW(),</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+
+    <update id="updatePhenotypeFile" parameterType="PhenotypeFile">
+        update phenotype_file
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="tableName != null">table_name = #{tableName},</if>
+            <if test="treeId != null">tree_id = #{treeId},</if>
+            <if test="speciesId != null">species_id = #{speciesId},</if>
+            <if test="populationId != null">population_id = #{populationId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="year != null">year = #{year},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where file_id = #{fileId}
+    </update>
+
+    <!--    <update id="updatePhenotypeFileColum">-->
+    <!--        UPDATE #{tableName}-->
+    <!--        SET #{key} =  #{value} where 'phenotype_id' is #{phenotypeId}-->
+    <!--    </update>-->
+
+    <update id="updatePhenotypeFileColum">
+        UPDATE ${tableName}
+        SET ${key} = #{value}
+        WHERE phenotype_id = ${phenotypeId}
+    </update>
+
+
+    <delete id="deletePhenotypeFileByFileId" parameterType="Long">
+        delete
+        from phenotype_file
+        where file_id = #{fileId}
+    </delete>
+
+    <delete id="deletePhenotypeFileByTableName" parameterType="String">
+        delete
+        from phenotype_file
+        where table_name = #{tableName}
+    </delete>
+
+    <delete id="deletePhenotypeFileByFileIds" parameterType="String">
+        delete from phenotype_file where file_id in
+        <foreach item="fileId" collection="array" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </delete>
+    <delete id="deleteExportFileByTableName">
+        delete
+        from phenotype_file
+        where table_name = #{tableName}
+          and tree_id = -1
+    </delete>
+    <select id="selectPopulationBySpecies" resultType="java.lang.Long">
+        select population_id
+        from phenotype_file
+        where species_id = #{speciseId}
+    </select>
+    <select id="selectPhenotypeListYears" resultType="java.lang.String">
+        select DISTINCT year
+        from phenotype_file
+        where species_id = #{speciesId}
+          AND population_id = #{populationId}
+    </select>
+    <select id="selectPhenotypeListLocations" resultType="java.lang.String">
+        select DISTINCT location
+        from phenotype_file
+        where species_id = #{speciesId}
+          and population_id = #{populationId}
+          and `year` = #{year}
+    </select>
+    <select id="selectTableNameByFourElement" resultType="java.lang.String">
+        select table_name from phenotype_file
+        <where>
+            <if test="speciesId != null and speciesId !=''">and species_id = #{speciesId}</if>
+            <if test="populationId != null and populationId !=''">and population_id = #{populationId}</if>
+            <if test="year != null and year !=''">and year = #{year}</if>
+            <if test="location != null and location !=''">and location = #{location}</if>
+        </where>
+    </select>
+
+    <select id="selectPhenotypeByTableName" resultMap="PhenotypeResult">
+        select *
+        from ${tableName}
+    </select>
+
+    <select id="selectLatestPhenotypeFileByTableName" resultMap="PhenotypeFileResult">
+        select *
+        from phenotype_file
+        where table_name = #{tableName}
+          and file_id = (select max(file_id) from phenotype_file where table_name = #{tableName} and tree_id != -1)
+    </select>
+
+    <select id="selectAllColumns" resultType="java.util.Map">
+        <if test="tableName != null and tableName != ''">
+            SELECT * FROM ${tableName}
+        </if>
+        <if test="tableName == null or tableName == ''">
+            SELECT NULL
+        </if>
+    </select>
+
+    <select id="getAllColumns" resultType="java.lang.String">
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = #{tableName}
+    </select>
+
+    <select id="selectTableNameByFileId" parameterType="String" resultType="String">
+        select table_name
+        from phenotype_file
+        where file_id = #{fileId}
+    </select>
+
+    <select id="ifHaveTable" parameterType="String" resultType="Integer">
+        SELECT COUNT(*)
+        FROM information_schema.TABLES
+        WHERE table_name = #{tableName}
+    </select>
+
+    <resultMap id="MaterialMap" type="com.feidian.sidebarTree.domain.Material">
+        <result column="kind_id" property="kindId"/>
+        <result column="kind_name" property="kindName"/>
+        <result column="material_id" property="materialId"/>
+        <result column="field_id" property="fieldId"/>
+        <result column="control_type" property="controlType"/>
+        <result column="father" property="father"/>
+        <result column="mother" property="mother"/>
+        <result column="tableName" property="tableName"/>
+    </resultMap>
+
+    <select id="selectMaterialByTableName" parameterType="com.feidian.sidebarTree.domain.Material"
+            resultMap="MaterialMap">
+        select kind_id, kind_name, material_id, field_id, control_type, father, mother
+        from ${tableName}
+        where ((#{kindId} is null or #{kindId} = '') or kind_id like concat('%', #{kindId}, '%'))
+          and ((#{kindName} is null or #{kindName} = '') or kind_name like concat('%', #{kindName}, '%'))
+          and ((#{materialId} is null or #{materialId} = '') or material_id like concat('%', #{materialId}, '%'))
+          and ((#{fieldId} is null or #{fieldId} = '') or field_id like concat('%', #{fieldId}, '%'))
+          and ((#{controlType} is null or #{controlType} = '') or control_type like concat('%', #{controlType}, '%'))
+          and ((#{father} is null or #{father} = '') or father like concat('%', #{father}, '%'))
+          and ((#{mother} is null or #{mother} = '') or mother like concat('%', #{mother}, '%'))
+    </select>
+
+    <select id="selectFileNameByFileId" parameterType="String" resultType="String">
+        select file_name
+        from phenotype_file
+        where file_id = #{fileId}
+    </select>
+
+    <select id="getAllSortedColumns" resultType="java.lang.String">
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = #{tableName}
+        ORDER BY ORDINAL_POSITION;
+    </select>
+    <select id="slectPhenotypeLineByTableName" resultType="java.lang.Long">
+        select count(*)
+        from ${tableName}
+    </select>
+    <select id="getAllTraitIdColumnsWithSorted" resultType="java.lang.String">
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = #{tableName}
+          AND COLUMN_NAME like 'trait_id_%'
+        ORDER BY ORDINAL_POSITION;
+    </select>
+    <select id="getAllTraitIdAndValueColumnsWithSorted" resultType="java.lang.String">
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = #{tableName}
+          AND (COLUMN_NAME like 'trait_id_%' OR COLUMN_NAME like 'trait_value_%')
+        ORDER BY ORDINAL_POSITION;
+    </select>
+    <select id="selectTraitBindingByTableName" resultType="java.util.Map">
+        #         select * from ${tableName} where phenotype_id = 1;
+        select ${columns}
+        from ${tableName}
+        where phenotype_id = 1;
+    </select>
+    <!--    <select id="getAreaName" resultType="java.lang.String">-->
+    <!--        select distinct(location)-->
+    <!--        from phenotype_file-->
+    <!--    </select>-->
+
+    <select id="listAllPhenotypeTableNames" resultType="java.lang.String">
+        SELECT table_name
+        FROM phenotype_file;
+    </select>
+
+    <select id="selectTableIsInPhenotypeFile" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM phenotype_file
+        where table_name = #{tableName}
+    </select>
+
+    <select id="selectLatestFileByLocation" resultMap="PhenotypeFileResult" parameterType="string">
+        <include refid="selectPhenotypeFileVo"/>
+        where file_id in (
+        SELECT MAX(file_id) AS max_id
+        FROM phenotype_file
+        WHERE location = #{location}
+        GROUP BY table_name
+        )
+    </select>
+    <select id="selectExportFileUrlByTableName" resultType="java.lang.String">
+        select url
+        from phenotype_file
+        where table_name = ${tableName}
+          and tree_id = -1
+    </select>
+    <select id="getTableNameByFileId" resultType="java.lang.String">
+        select table_name
+        from phenotype_file
+        where file_id = #{fileId}
+    </select>
+
+    <select id="selectAllColumnsByPage" resultType="java.util.Map">
+        SELECT * FROM ${tableName}
+    </select>
+    <select id="selectTableCount" resultType="java.lang.Integer">
+        SELECT count(*) FROM ${tableName}
+    </select>
+    <select id="selectPhenotypeFileListCountByTableName" resultType="java.lang.Long">
+        select count(*) from phenotype_file where table_name = #{tableName} and tree_id != -1
+    </select>
+
+</mapper>
