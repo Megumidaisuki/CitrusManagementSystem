@@ -5,12 +5,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.feidian.common.config.ZhongMiaoConfig;
+import com.feidian.common.utils.StringUtils;
+import com.feidian.common.utils.file.FileUtils;
 import com.feidian.sidebarTree.domain.SidebarTree;
 import com.feidian.sidebarTree.domain.TreeFile;
 import com.feidian.sidebarTree.domain.TreePicture;
 import com.feidian.sidebarTree.service.FillService;
 import com.feidian.sidebarTree.service.ISidebarTreeService;
 import com.feidian.sidebarTree.service.ITreePictureService;
+import jnr.ffi.annotations.In;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -25,6 +29,9 @@ import com.feidian.common.core.domain.AjaxResult;
 import com.feidian.common.enums.BusinessType;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 【请填写功能名称】Controller
@@ -157,6 +164,30 @@ public class TreePictureController extends BaseController
     public AjaxResult getInfo(@PathVariable("pictureId") Long pictureId)
     {
         return AjaxResult.success(treePictureService.selectTreePictureByPictureId(pictureId));
+    }
+
+    /**
+     * 下载文件
+     * @param pictureId
+     * @param response
+     * @param request
+     */
+    @GetMapping("/download")
+    public void fileDownload(Integer pictureId, HttpServletResponse response, HttpServletRequest request) throws Exception {
+        try{
+
+
+            String filePath = treePictureService.selectPictureUrlById(pictureId);
+            String realFileName = filePath.substring(filePath.lastIndexOf("\\")+1);
+            filePath = filePath.replace("\\", "\\\\");
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+            FileUtils.setAttachmentResponseHeader(response, realFileName);
+            FileUtils.writeBytes(filePath, response.getOutputStream());
+        }
+        catch (Exception e)
+        {
+            throw new Exception("文件下载失败");
+        }
     }
 
     /**

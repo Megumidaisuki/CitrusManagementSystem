@@ -22,7 +22,7 @@ feidian:
 
 # 开发环境配置
 server:
-  port: 8080
+  port: 10008
   servlet:
     # 应用的访问路径
     context-path: /

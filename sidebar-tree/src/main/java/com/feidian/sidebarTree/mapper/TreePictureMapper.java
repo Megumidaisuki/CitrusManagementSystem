@@ -68,4 +68,6 @@ public interface TreePictureMapper
 
     @MapKey("tree_name")
     public List<Object> selectTreePictureCountByTreeId(@Param("tree_id") Long treeId);
+
+    String selectPictureUrlById(Integer pictureId);
 }

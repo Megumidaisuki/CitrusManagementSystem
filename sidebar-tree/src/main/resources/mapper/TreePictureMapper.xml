@@ -53,6 +53,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                      ) t) value, ss.tree_name name FROM sidebar_tree ss WHERE parent_id = #{tree_id}
 
     </select>
+    <select id="selectPictureUrlById" resultType="java.lang.String">
+        select picture_url from tree_picture where picture_id = #{pictureId}
+    </select>
 
     <insert id="insertTreePicture" parameterType="TreePicture" useGeneratedKeys="true" keyProperty="pictureId">
         insert into tree_picture

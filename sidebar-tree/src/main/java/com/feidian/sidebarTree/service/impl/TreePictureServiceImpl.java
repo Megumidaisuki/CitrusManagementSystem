@@ -123,4 +123,9 @@ public class TreePictureServiceImpl implements ITreePictureService
     public List<Object> getNodePicCount(Long treeId) {
         return treePictureMapper.selectTreePictureCountByTreeId(treeId);
     }
+
+    @Override
+    public String selectPictureUrlById(Integer pictureId) {
+        return treePictureMapper.selectPictureUrlById(pictureId);
+    }
 }

@@ -65,4 +65,6 @@ public interface ITreePictureService
 
     public List<Object> getNodePicCount(Long treeId);
 
+
+    String selectPictureUrlById(Integer pictureId);
 }
