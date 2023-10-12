@@ -18,7 +18,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-// 有关传感器的类
+/**
+ * 传感器Controller
+ *
+ * @author feidian
+ * @date 2023-10-11
+ */
 @RestController
 @RequestMapping("/citrus/data")
 public class DataController extends BaseController{
