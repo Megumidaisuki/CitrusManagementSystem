@@ -118,6 +118,7 @@ public class PythonUse {
      */
     public String predictGrowPoint(String fileUrl,long treeId) {
         //这方法相较比较特殊，生成的图片到特定的文件夹中，因此处理前，先把文件夹清空
+        // TODO 把这个文件路径给改了
         File parentFile =new File("C:\\Users\\Administrator\\Desktop\\YOLOX-growpoint\\YOLOX_outputs\\yolox_voc_s\\vis_res");
         cleanFile(parentFile);
         parentFile.mkdirs();
@@ -143,6 +144,7 @@ public class PythonUse {
             e.printStackTrace();
         }
         StringBuffer reslutUrl=new StringBuffer("");
+        // TODO 把这个文件路径给改了
         File path=new File("C:\\Users\\Administrator\\Desktop\\YOLOX-growpoint\\YOLOX_outputs\\yolox_voc_s\\vis_res");
         //列出该目录下所有文件和文件夹
         reslutUrl.append(path.getAbsoluteFile());

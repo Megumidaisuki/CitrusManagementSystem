@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feidian.sidebarTree.mapper.SensorMapper">
+
+    <insert id="saveData" parameterType="Data">
+        insert into sensor(ambientTemperature,ambientHumidity,CO2,pow,RSSI,lightIntensity,detectedTime,clientId,dewTemp)  values(#{ambientTemperature},#{ambientHumidity},#{CO2},#{pow},#{RSSI},#{lightIntensity},#{detectedTime},#{clientId},#{dewTemp})
+    </insert>
+
+    <select id="selectAmbientTemperature" resultType="float">
+        select ambientTemperature from sensor where detectedTime &gt; #{starttime} and detectedTime &lt; #{endtime}
+    </select>
+
+    <select id="selectAmbientHumidity" resultType="float">
+        select ambientHumidity from sensor where detectedTime &gt; #{starttime} and detectedTime &lt; #{endtime}
+    </select>
+
+    <select id="selectCO2" resultType="int">
+        select CO2 from sensor where detectedTime &gt; #{starttime} and detectedTime &lt; #{endtime}
+    </select>
+
+<!--    <select id="selectPow" resultType="float">-->
+<!--        select pow from sensor-->
+<!--    </select>-->
+
+<!--    <select id="selectRSSI" resultType="float">-->
+<!--        select RSSI from sensor-->
+<!--    </select>-->
+
+    <select id="selectLightIntensity" resultType="int">
+        select lightIntensity from sensor where detectedTime &gt; #{starttime} and detectedTime &lt; #{endtime}
+    </select>
+
+    <select id="selectDewTemp" resultType="String">
+        select dewTemp from sensor where detectedTime &gt; #{starttime} and detectedTime &lt; #{endtime}
+    </select>
+
+    <select id="selectAll" resultType="Data">
+        select ambientTemperature,ambientHumidity,CO2,pow,RSSI,lightIntensity,detectedTime,clientId,dewTemp from sensor
+    </select>
+
+    <delete id="deleteData" parameterType="String">
+        delete from sensor where detectedTime &lt; #{nowtime}
+    </delete>
+</mapper>
