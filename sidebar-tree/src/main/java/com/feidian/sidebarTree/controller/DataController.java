@@ -25,7 +25,7 @@ import java.util.List;
  * @date 2023-10-11
  */
 @RestController
-@RequestMapping("/citrus/data")
+@RequestMapping("/greenhouse/data")
 public class DataController extends BaseController{
     @Autowired
     private SensorService sensorService;
