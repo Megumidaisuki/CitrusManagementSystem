@@ -28,7 +28,8 @@ public class PhenotypeController extends BaseController {
     @Autowired
     private IPhenotypeService phenotypeService;
 
-    @GetMapping("/species")
+    //本项目好像都不会有这些数据
+   /* @GetMapping("/species")
     public AjaxResult listSpecies() {
         return AjaxResult.success(phenotypeService.listSpecies());
     }
@@ -48,7 +49,7 @@ public class PhenotypeController extends BaseController {
     public AjaxResult listLocations(@RequestParam Long speciesId, @RequestParam Long populationId, @RequestParam String year) {
 
         return AjaxResult.success(phenotypeService.listLocations(speciesId, populationId, year));
-    }
+    }*/
     @GetMapping("/tableName")
     public AjaxResult listTableName(@RequestParam(value = "speciesId",required=false)  Long speciesId, @RequestParam(value = "populationId",required=false)  Long populationId,
                                     @RequestParam(value = "year",required=false)  String year , @RequestParam(value = "location",required=false)  String location) {
@@ -64,12 +65,12 @@ public class PhenotypeController extends BaseController {
     }
 
 
-
-    @GetMapping("/relations")
+    //本项目没有父母本，所以不存在亲属关系
+    /*@GetMapping("/relations")
     public AjaxResult ShowRelationships(@RequestParam String material_id){
 
         return AjaxResult.success(phenotypeService.selectMaterialRelationships(material_id));
-    }
+    }*/
 
     /**
      * 查询所有表型

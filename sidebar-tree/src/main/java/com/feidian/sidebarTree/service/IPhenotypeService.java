@@ -15,21 +15,23 @@ import java.util.Map;
 public interface IPhenotypeService 
 {
 
-    Map<Long,String> listSpecies();
+    List<String> selectTableName(Long speciesId, Long populationId, String year, String location);
+
+    List<Phenotype> selectTable(Long speciesId, Long populationId, String year, String location,String tableName) ;
+
+    List<String> listAllPhenotypeTableNames();
+
+    List<Phenotype> listAllPhenotype(List<String> TableNames);
+
+    /*Map<Long,String> listSpecies();
 
     Map<Long,String> listPopulation(Long speciesId);
 
     List<String> listYears(Long speciesId, Long populationId);
 
-    List<String> listLocations(Long speciesId, Long populationId, String year);
+    List<String> listLocations(Long speciesId, Long populationId, String year);*/
 
+    //本项目没有父母本，所以不存在亲属关系
+    /*List<Relationship> selectMaterialRelationships(String material_id);*/
 
-    List<Relationship> selectMaterialRelationships(String material_id);
-
-
-    List<String> selectTableName(Long speciesId, Long populationId, String year, String location);
-    List<Phenotype> selectTable(Long speciesId, Long populationId, String year, String location,String tableName) ;
-    List<String> listAllPhenotypeTableNames();
-
-    List<Phenotype> listAllPhenotype(List<String> TableNames);
 }

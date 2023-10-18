@@ -35,25 +35,25 @@ public class PhenotypeFileVO extends BaseEntity
     @Excel(name = "树节点id")
     private Long treeId;
 
-    /** 物种ID */
+   /* *//** 物种ID *//*
     @Excel(name = "物种名")
     private String speciesName;
 
-    /** 群体ID */
+    *//** 群体ID *//*
     @Excel(name = "群体名")
     private String populationName;
-
+*/
     /** 是否公开 */
     @Excel(name = "是否公开")
     private int status;
 
-    /** 数据采集年份 */
+   /* *//** 数据采集年份 *//*
     @Excel(name = "数据采集年份")
     private String year;
 
-    /** 数据采集地区 */
+    *//** 数据采集地区 *//*
     @Excel(name = "数据采集地区")
-    private String location;
+    private String location;*/
 
     /** 数据路径url */
     @Excel(name = "数据路径url")
@@ -96,7 +96,7 @@ public class PhenotypeFileVO extends BaseEntity
         return treeId;
     }
 
-    public String getSpeciesName() {
+    /*public String getSpeciesName() {
         return speciesName;
     }
 
@@ -110,7 +110,7 @@ public class PhenotypeFileVO extends BaseEntity
 
     public void setPopulationName(String populationName) {
         this.populationName = populationName;
-    }
+    }*/
 
     public void setStatus(int status)
     {
@@ -121,7 +121,7 @@ public class PhenotypeFileVO extends BaseEntity
     {
         return status;
     }
-    public void setYear(String year)
+    /*public void setYear(String year)
     {
         this.year = year;
     }
@@ -138,7 +138,7 @@ public class PhenotypeFileVO extends BaseEntity
     public String getLocation()
     {
         return location;
-    }
+    }*/
     public void setUrl(String url)
     {
         this.url = url;
@@ -149,16 +149,16 @@ public class PhenotypeFileVO extends BaseEntity
         return url;
     }
 
-    public PhenotypeFileVO(Long fileId, String fileName, String tableName, Long treeId, String speciesName, String populationName, int status, String year, String location, String url, String createBy, Date createTime, String updateBy, Date updateTime, String remark) {
+    public PhenotypeFileVO(Long fileId, String fileName, String tableName, Long treeId, /*String speciesName, String populationName,*/ int status,/* String year, String location,*/ String url, String createBy, Date createTime, String updateBy, Date updateTime, String remark) {
         this.fileId = fileId;
         this.fileName = fileName;
         this.tableName = tableName;
         this.treeId = treeId;
-        this.speciesName = speciesName;
-        this.populationName = populationName;
+        /*this.speciesName = speciesName;
+        this.populationName = populationName;*/
         this.status = status;
-        this.year = year;
-        this.location = location;
+        /*this.year = year;
+        this.location = location;*/
         this.url = url;
         super.setCreateBy(createBy);
         super.setCreateTime(createTime);
@@ -174,11 +174,11 @@ public class PhenotypeFileVO extends BaseEntity
                 .append("fileName", getFileName())
                 .append("tableName", getTableName())
                 .append("treeId", getTreeId())
-                .append("speciesName", getSpeciesName())
-                .append("populationName", getPopulationName())
+                /*.append("speciesName", getSpeciesName())
+                .append("populationName", getPopulationName())*/
                 .append("status", getStatus())
-                .append("year", getYear())
-                .append("location", getLocation())
+                /*.append("year", getYear())
+                .append("location", getLocation())*/
                 .append("url", getUrl())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())

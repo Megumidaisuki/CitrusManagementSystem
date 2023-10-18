@@ -58,11 +58,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
     @Autowired
     private PhenotypeFileMapper phenotypeFileMapper;
 
-    @Autowired
+    /*@Autowired
     private PopulationMapper populationMapper;
 
     @Autowired
-    private SpeciesMapper speciesMapper;
+    private SpeciesMapper speciesMapper;*/
 
     @Autowired
     private TraitMapper traitMapper;
@@ -70,8 +70,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
     @Autowired
     private ExcuteMapper excuteMapper;
 
-    @Autowired
-    private GermplasmParentsMapper germplasmParentsMapper;
+   /* @Autowired
+    private GermplasmParentsMapper germplasmParentsMapper;*/
 
     @Autowired
     private FileUtil fileUtil;
@@ -140,7 +140,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         }
         ArrayList<PhenotypeFileVO> phenotypeFileVOList = new ArrayList<>();
         for (PhenotypeFile file : phenotypeFileList) {
-            Species species = speciesMapper.selectSpeciesBySpeciesIdWithoutDeleted(file.getSpeciesId());
+            /*Species species = speciesMapper.selectSpeciesBySpeciesIdWithoutDeleted(file.getSpeciesId());
             Population population = populationMapper.selectPopulationByPopulationIdWithoutDeleted(file.getPopulationId());
             String speciesName = null;
             String populationName = null;
@@ -152,7 +152,13 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
             }
             phenotypeFileVOList.add(new PhenotypeFileVO(file.getFileId(),file.getFileName(),
                     file.getTableName(),file.getTreeId(),
-                    speciesName,populationName,file.getStatus(),file.getYear().substring(0,4),file.getLocation(),file.getUrl(),file.getCreateBy(),file.getCreateTime(),file.getUpdateBy(),file.getUpdateTime(),file.getRemark()));
+                    speciesName,populationName,file.getStatus(),file.getYear().substring(0,4),
+                    file.getLocation(),file.getUrl(),file.getCreateBy(),file.getCreateTime(),
+                    file.getUpdateBy(),file.getUpdateTime(),file.getRemark()));*/
+            phenotypeFileVOList.add(new PhenotypeFileVO(file.getFileId(),file.getFileName(),
+                    file.getTableName(),file.getTreeId(), file.getStatus(),file.getUrl(),
+                    file.getCreateBy(),file.getCreateTime(), file.getUpdateBy(),file.getUpdateTime(),
+                    file.getRemark()));
         }
         return phenotypeFileVOList;
     }
@@ -220,14 +226,9 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         r1 = csvReader.getRawRecord().split(",");
                     }
                     else throw new ServiceException("无数据");
-                    //拿物种 种群 性状列表
-                    HashMap<String, Long> populationsMap = infoUtil.getPopulationsMap();
-                    HashMap<String, Long> speciesMap = infoUtil.getSpeciesMap();
+                    //获取性状
                     HashMap<String, Long> traitMap = infoUtil.getTraitsMap();
-                    phenotypeFile.setSpeciesId(speciesMap.get(r1[0]));
-                    phenotypeFile.setPopulationId(populationsMap.get(r1[1]));
-                    phenotypeFile.setYear(r1[2]);
-                    phenotypeFile.setLocation(r1[3]);
+
                     //如果物种，群体列表中没有对应的，就新建
                     if (phenotypeFile.getSpeciesId() == null) {
                         Species species = new Species();

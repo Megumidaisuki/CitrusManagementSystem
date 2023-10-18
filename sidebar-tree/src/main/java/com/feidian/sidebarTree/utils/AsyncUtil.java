@@ -1,6 +1,5 @@
 package com.feidian.sidebarTree.utils;
 
-import com.feidian.sidebarTree.mapper.GermplasmParentsMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -10,15 +9,15 @@ import java.util.HashSet;
 @Component
 public class AsyncUtil {
 
-    @Autowired
-    private GermplasmParentsMapper germplasmParentsMapper;
+    /*@Autowired
+    private GermplasmParentsMapper germplasmParentsMapper;*/
 
-    @Async
+    /*@Async
     public void createGermplasmParents(HashSet<GermplasmParents> germplasmParentsHashSet){
         for (GermplasmParents germplasmParents : germplasmParentsHashSet) {
             germplasmParentsMapper.createGermplasmParents(germplasmParents);
         }
-    }
+    }*/
 
     //todo 基因型上传/合并后异步生成图片
     @Async

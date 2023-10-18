@@ -3,11 +3,8 @@ package com.feidian.sidebarTree.service.impl;
 import java.util.*;
 
 import com.feidian.sidebarTree.domain.*;
-import com.feidian.sidebarTree.mapper.GermplasmParentsMapper;
 import com.feidian.sidebarTree.mapper.PhenotypeFileMapper;
 
-import com.feidian.sidebarTree.mapper.PopulationMapper;
-import com.feidian.sidebarTree.mapper.SpeciesMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.feidian.sidebarTree.service.IPhenotypeService;
@@ -52,7 +49,7 @@ public class PhenotypeServiceImpl implements IPhenotypeService {
         return phenotypes;
     }
 
-    @Autowired
+   /* @Autowired
     private SpeciesMapper speciesMapper;
 
     @Autowired
@@ -60,14 +57,14 @@ public class PhenotypeServiceImpl implements IPhenotypeService {
 
 
     @Autowired
-    private GermplasmParentsMapper germplasmParentsMapper;
+    private GermplasmParentsMapper germplasmParentsMapper;*/
 
 
     /**
      * 查询列出所有物种
      *
      * @return 所有species
-     */
+     *//*
     @Override
     public Map<Long, String> listSpecies() {
         Map<Long, String> speciesMap = new HashMap<>();
@@ -77,13 +74,13 @@ public class PhenotypeServiceImpl implements IPhenotypeService {
             speciesMap.put(sp.getSpeciesId(), sp.getSpeciesName());
         }
         return speciesMap;
-    }
+    }*/
 
-    /**
+   /* *//**
      * 列出群落
      *
      * @return
-     */
+     *//*
     @Override
     public Map<Long, String> listPopulation(Long speciesId) {
         Map<Long, String> populationMap = new HashMap<>();
@@ -97,14 +94,14 @@ public class PhenotypeServiceImpl implements IPhenotypeService {
         }
         return populationMap;
     }
-
+*/
     /**
      * 查询年份
      *
      * @param speciesId
      * @param populationId
      * @return
-     */
+     *//*
     @Override
     public List<String> listYears(Long speciesId, Long populationId) {
         List<String> years = phenotypeFileMapper.selectPhenotypeListYears(speciesId, populationId);
@@ -118,8 +115,8 @@ public class PhenotypeServiceImpl implements IPhenotypeService {
         }
         return years;
     }
-
-    @Override
+*/
+ /*   @Override
     public List<String> listLocations(Long speciesId, Long populationId, String year) {
         List<String> locations = phenotypeFileMapper.selectPhenotypeListLocations(speciesId, populationId, year);
 
@@ -129,9 +126,9 @@ public class PhenotypeServiceImpl implements IPhenotypeService {
 
         return locations;
     }
+*/
 
-
-    // 主函数，参数为物料ID，返回值为该物料的所有关系
+    /*// 主函数，参数为物料ID，返回值为该物料的所有关系
     @Override
     public List<Relationship> selectMaterialRelationships(String material_id) {
         // 构建一个映射表，用于快速查找父母
@@ -180,6 +177,6 @@ public class PhenotypeServiceImpl implements IPhenotypeService {
         }
     }
 
-
+*/
 }
 
