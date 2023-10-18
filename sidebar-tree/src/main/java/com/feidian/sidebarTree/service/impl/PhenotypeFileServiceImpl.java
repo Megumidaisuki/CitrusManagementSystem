@@ -20,6 +20,7 @@ import com.feidian.sidebarTree.utils.CsvUtils;
 import com.feidian.sidebarTree.utils.FileUtil;
 import com.feidian.sidebarTree.utils.InfoUtil;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.python.antlr.ast.Str;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -468,46 +469,24 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 // 7.2 行扩增
                 long count = 0L;
                 HashMap<String, Long> traitsMap = infoUtil.getTraitsMap();
-                HashMap<String, Long> speciesMap = infoUtil.getSpeciesMap();
-                HashMap<String, Long> populationsMap = infoUtil.getPopulationsMap();
-                StringBuilder insertSqlBuilder = new StringBuilder("insert into " + tableName + " (species_id,population_id,`year`,location,`repeat`," +
-                        "kind_id,kind_name,material_id,field_id,control_type,father,mother,remark");
+
+                StringBuilder insertSqlBuilder = new StringBuilder("insert into " + tableName + " (material_id");
                 List<String> traitParam = phenotypeFileMapper.getAllTraitIdAndValueColumnsWithSorted(tableName);
                 for (String param : traitParam) {
                     insertSqlBuilder.append(",").append(param);
                 }
-                Species species = speciesMapper.selectSpeciesBySpeciesIdWithoutDeleted(phenotypeFile.getSpeciesId());
-                Population population = populationMapper.selectPopulationByPopulationIdWithoutDeleted(phenotypeFile.getPopulationId());
                 insertSqlBuilder.append(",create_by,create_time) values");
-                HashSet<GermplasmParents> germplasmParentsHashSet = new HashSet<>();
-                HashSet<GermplasmParents> existgermplasmParentsHashSet = new HashSet<>(germplasmParentsMapper.getAllGermplasmParentsInfo());
                 while(csvReader.readRecord()){
                     //行扩增
                     if(count >= tableLines) {
                         String[] data = csvReader.getValues();
-                        //提取材料,父,母信息
-                        GermplasmParents germplasmParents = new GermplasmParents();
-                        germplasmParents.setFather(data[10]);
-                        germplasmParents.setMother(data[11]);
-                        germplasmParents.setMaterialId(data[7]);
-                        if(!existgermplasmParentsHashSet.contains(germplasmParents) && !StringUtils.isEmpty(germplasmParents.getFather()) && !StringUtils.isEmpty(germplasmParents.getMother()) && !StringUtils.isEmpty(germplasmParents.getMaterialId()))
-                            germplasmParentsHashSet.add(germplasmParents);
-                        if (
-                                !StringUtils.isEmpty(data[0]) && !species.getSpeciesName().equals(data[0]) ||
-                                !StringUtils.isEmpty(data[1]) && !population.getPopulationName().equals(data[1]) ||
-                                !StringUtils.isEmpty(data[2]) && !phenotypeFile.getYear().substring(0,4).equals(data[2]) ||
-                                !StringUtils.isEmpty(data[3]) && !phenotypeFile.getLocation().equals(data[3])
-                        ){
-                            throw new ServiceException("文件中物种,群体,年份,地区存在冲突或为空");
-                        }
+                        //提起材料名称
+                        String materialId = data[0];
+
                         StringBuilder insertDataBuilder = new StringBuilder("(");
                         for (int index : columnIndex) {
                             if(traitsMap.get(headers[index]) != null && !headers[index].equals("备注"))
                                 insertDataBuilder.append(StringUtils.isEmpty(headers[index])?"null" : (ObjectUtils.isEmpty(traitsMap.get(headers[index]))?"null" : "'" + traitsMap.get(headers[index]) + "'")).append(",");
-                            if(headers[index].equals("物种"))
-                                insertDataBuilder.append(speciesMap.get(data[index])).append(",");
-                            else if(headers[index].equals("群体"))
-                                insertDataBuilder.append(populationsMap.get(data[index])).append(",");
                             else
                                 insertDataBuilder.append(StringUtils.isEmpty(data[index])?"null":"'" + data[index] + "'").append(",");
                         }
@@ -546,8 +525,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 phenotypeFile.setFileName(fileName);
                 phenotypeFile.setRemark(remark);
                 phenotypeFileMapper.insertPhenotypeFile(phenotypeFile);
-                //添加遗传关系
-                asyncUtil.createGermplasmParents(germplasmParentsHashSet);
+
+
             }catch (ServiceException e) {
                 //异常时改表语句回滚
                 for (String dropColumSql : dropColumParam) {
@@ -945,8 +924,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
 //    @Cacheable(value = "selectDetailByFileId",key = "#fileId") 分页和缓存冲突
     @Override
     public List<PhenotypeDetailVO> selectDetailByFileId(Long fileId,boolean startPage) {
-        HashMap<Long, String> speciesMap = infoUtil.getSpeciesMapReverse();
-        HashMap<Long, String> populationMap = infoUtil.getPopulationsMapReverse();
+
         HashMap<Long, Trait> traitsObjectMapReverse = infoUtil.getTraitsObjectMapReverse();
         //查到选档的表型文件
         PhenotypeFile phenotypeFile = selectPhenotypeFileByFileId(fileId);
@@ -1101,44 +1079,24 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
 //                System.out.println(entry.getKey() + ": " + entry.getValue());
 //            }
             Object phenotypeId = maps.get("phenotype_id");
-            Object repeat = maps.get("repeat");
-            Object kind_id = maps.get("kind_id");
-            Object kind_name = maps.get("kind_name");
             Object material_id = maps.get("material_id");
-            Object field_id = maps.get("field_id");
-            Object control_type = maps.get("control_type");
-            Object father = maps.get("father");
-            Object mother = maps.get("mother");
             Object remark = maps.get("remark");
 //            PhenotypeFile phenotypeFile1 =new PhenotypeFile();
 //            PhenotypeDetailVO convert = OrikaUtils.convert(phenotypeFile1, PhenotypeDetailVO.class);
 //            System.out.println("convert:"+convert);
             PhenotypeDetailVO phenotypeDetailVO  =new PhenotypeDetailVO();
             phenotypeDetailVO.setFileId(phenotypeFile.getFileId());
-            phenotypeDetailVO.setYear(phenotypeFile.getYear().substring(0,4));
             phenotypeDetailVO.setFileName(phenotypeFile.getFileName());
             phenotypeDetailVO.setUrl(phenotypeFile.getUrl());
-            phenotypeDetailVO.setPopulationId(phenotypeFile.getPopulationId());
-            phenotypeDetailVO.setPopulationName(populationMap.get(phenotypeFile.getPopulationId()));
             phenotypeDetailVO.setStatus( phenotypeFile.getStatus());
-            phenotypeDetailVO.setLocation( phenotypeFile.getLocation());
             phenotypeDetailVO.setTreeId(phenotypeFile.getTreeId());
             if (phenotypeId != null) {
                 phenotypeDetailVO.setPhenotypeId((long) phenotypeId);
             }
-            if (repeat != null) {
-                phenotypeDetailVO.setRepeat((long) repeat);
-            }
-            phenotypeDetailVO.setKindId(kind_id != null ? kind_id.toString() : null);
-            phenotypeDetailVO.setKindName(kind_name != null ? kind_name.toString() : null);
+
             phenotypeDetailVO.setMaterialId(material_id != null ? material_id.toString() : null);
-            if (field_id != null) {
-                phenotypeDetailVO.setFieldId((long) field_id);
-            }
+
             phenotypeDetailVO.setTableName(tableName);
-            phenotypeDetailVO.setControlType(control_type != null ? control_type.toString() : null);
-            phenotypeDetailVO.setFather(father != null ? father.toString() : null);
-            phenotypeDetailVO.setMother(mother != null ? mother.toString() : null);
             phenotypeDetailVO.setRemark(remark != null ? remark.toString() : null);
             ArrayList<LinkedHashMap<String, HashMap<String,String>>> traitMap = new ArrayList<>();
             for (Map.Entry<String, Integer> entry : entryList) {
@@ -1148,11 +1106,6 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
             }
 
             phenotypeDetailVO.setTraits(traitMap);
-
-
-
-            Optional.ofNullable(speciesId).ifPresent(phenotypeDetailVO::setSpeciesId);
-            phenotypeDetailVO.setSpeciesName(speciesMap.get(speciesId));
 
             res.add(phenotypeDetailVO);
         }
@@ -1321,18 +1274,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 }
             }
             //改表头名字
-            columns.set(columns.indexOf("species_id"),"物种");
-            columns.set(columns.indexOf("population_id"),"群体");
-            columns.set(columns.indexOf("year"),"年份");
-            columns.set(columns.indexOf("location"),"地区");
-            columns.set(columns.indexOf("repeat"),"重复试验");
-            columns.set(columns.indexOf("kind_id"),"品种ID");
-            columns.set(columns.indexOf("kind_name"),"品种名称");
             columns.set(columns.indexOf("material_id"),"材料名称");
-            columns.set(columns.indexOf("field_id"),"田间编号");
-            columns.set(columns.indexOf("control_type"),"对照类型");
-            columns.set(columns.indexOf("father"),"父本");
-            columns.set(columns.indexOf("mother"),"母本");
             columns.set(columns.indexOf("remark"),"备注");
             //生成文件
             String path = fileUtil.getFileUrl(phenotypeFile.getFileName() + ".csv",phenotypeFile.getTreeId());
@@ -1344,18 +1286,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
             //写入数据
             for (PhenotypeDetailVO phenotypeDetailVO : data) {
                 ArrayList<String> info = new ArrayList<>();
-                info.add(phenotypeDetailVO.getSpeciesName());
-                info.add(phenotypeDetailVO.getPopulationName());
-                info.add(phenotypeDetailVO.getYear());
-                info.add(phenotypeDetailVO.getLocation());
-                info.add(phenotypeDetailVO.getRepeat() == null ? null : phenotypeDetailVO.getRepeat().toString());
-                info.add(phenotypeDetailVO.getKindId() == null ? null : phenotypeDetailVO.getKindId());
-                info.add(phenotypeDetailVO.getKindName() == null ? null : phenotypeDetailVO.getKindName());
                 info.add(phenotypeDetailVO.getMaterialId() == null ? null : phenotypeDetailVO.getMaterialId());
-                info.add(phenotypeDetailVO.getFieldId() == null ? null : phenotypeDetailVO.getFieldId().toString());
-                info.add(phenotypeDetailVO.getControlType() == null ? null : phenotypeDetailVO.getControlType());
-                info.add(phenotypeDetailVO.getFather() == null ? null : phenotypeDetailVO.getFather());
-                info.add(phenotypeDetailVO.getMother() == null ? null : phenotypeDetailVO.getMother());
                 info.add(phenotypeDetailVO.getRemark() == null ? null : phenotypeDetailVO.getRemark());
                 for (LinkedHashMap<String, HashMap<String,String>> trait : phenotypeDetailVO.getTraits()) {
                     Set<Map.Entry<String, HashMap<String, String>>> set = trait.entrySet();
