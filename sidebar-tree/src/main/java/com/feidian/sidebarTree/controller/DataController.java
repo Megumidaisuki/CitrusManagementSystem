@@ -4,14 +4,8 @@ import com.feidian.common.core.domain.AjaxResult;
 import com.feidian.sidebarTree.domain.Data;
 import com.feidian.sidebarTree.domain.Time;
 import com.feidian.sidebarTree.service.SensorService;
-import jnr.ffi.annotations.In;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,7 +19,7 @@ import java.util.List;
  * @date 2023-10-11
  */
 @RestController
-@RequestMapping("/greenhouse/data")
+@RequestMapping("/citrus/data")
 public class DataController extends BaseController{
     @Autowired
     private SensorService sensorService;
