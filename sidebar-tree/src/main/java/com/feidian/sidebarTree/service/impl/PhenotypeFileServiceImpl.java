@@ -229,42 +229,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     //获取性状
                     HashMap<String, Long> traitMap = infoUtil.getTraitsMap();
 
-                    //如果物种，群体列表中没有对应的，就新建
-                    if (phenotypeFile.getSpeciesId() == null) {
-                        Species species = new Species();
-                        species.setSpeciesName(r1[0]);
-                        species.setCreateBy(userId.toString());
-                        speciesMapper.insertSpecies(species);
-                        species = speciesMapper.selectSpeciesListWithoutDeleted(species).get(0);
-                        phenotypeFile.setSpeciesId(species.getSpeciesId());
-                        speciesMap.put(species.getSpeciesName(),species.getSpeciesId());
-                    }
-                    if (phenotypeFile.getPopulationId() == null) {
-                        Population population = new Population();
-                        population.setPopulationName(r1[1]);
-                        population.setCreateBy(userId.toString());
-                        population.setSpeciesId(phenotypeFile.getSpeciesId());
-                        populationMapper.insertPopulation(population);
-                        population = populationMapper.selectPopulationListWithoutDeleted(population).get(0);
-                        phenotypeFile.setPopulationId(population.getPopulationId());
-                        populationsMap.put(population.getPopulationName(),population.getPopulationId());
-                    }
                     //建表
                     // 创建表的SQL语句
                     StringBuilder createSQLBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS " + phenotypeFile.getTableName() + " (" +
                             "phenotype_id bigint(20) AUTO_INCREMENT COMMENT '自增主键' PRIMARY KEY," +
-                            "species_id bigint(20) COMMENT '物种ID'," +
-                            "population_id bigint(20) COMMENT '群体ID'," +
-                            "`year` year COMMENT '数据采集年份'," +
-                            "location varchar(64) COMMENT '数据采集地区'," +
-                            "`repeat` bigint(20) COMMENT '重复实验'," +
-                            "kind_id varchar(64) COMMENT '品种ID'," +
-                            "kind_name varchar(64) COMMENT '品种名称'," +
                             "material_id varchar(64) COMMENT '材料名称'," +
-                            "field_id bigint(200) COMMENT '田间编号'," +
-                            "control_type varchar(64) COMMENT '对照类型'," +
-                            "father varchar(64) COMMENT '父本'," +
-                            "mother varchar(64) COMMENT '母本'," +
                             "create_by varchar(64) COMMENT '创建者'," +
                             "create_time datetime COMMENT '创建者时间'," +
                             "update_by varchar(64) COMMENT '更新者'," +
@@ -289,9 +258,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     //拼接表头
                     List<String[]> data = CsvUtils.read(filePath);
                     StringBuilder insertSQLBuilder = new StringBuilder("INSERT INTO " + phenotypeFile.getTableName() +
-                            " (species_id,population_id,`year`,location,`repeat`," +
-                            "kind_id,kind_name,material_id,field_id,control_type,father," +
-                            "mother");
+                            "(material_id");
                     traitId = 0;
                     traitParam = new StringBuilder();
                     for (int i = 12 ; i < headers.length - 1; i++) {
@@ -300,26 +267,20 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     }
                     insertSQLBuilder.append(traitParam);
                     insertSQLBuilder.append(",remark,create_by,create_time) values");
-                    HashSet<GermplasmParents> germplasmParentsHashSet = new HashSet<>();
-                    HashSet<GermplasmParents> existgermplasmParentsHashSet = new HashSet<>(germplasmParentsMapper.getAllGermplasmParentsInfo());
                     //拼接固定列
                     for (int i = 1; i < data.size(); i++) {
-                        //提取材料,父,母信息
-                        GermplasmParents germplasmParents = new GermplasmParents();
-                        germplasmParents.setFather(data.get(i)[10]);
-                        germplasmParents.setMother(data.get(i)[11]);
-                        germplasmParents.setMaterialId(data.get(i)[7]);
-                        if(!existgermplasmParentsHashSet.contains(germplasmParents) && !StringUtils.isEmpty(germplasmParents.getFather()) && !StringUtils.isEmpty(germplasmParents.getMother()) && !StringUtils.isEmpty(germplasmParents.getMaterialId()))
-                            germplasmParentsHashSet.add(germplasmParents);
-                        //如果某行四个匹配字段不对，则不入库，报错返回
-                        if(ObjectUtils.isEmpty(phenotypeFile.getSpeciesId())  || ObjectUtils.isEmpty(speciesMap.get(data.get(i)[0])) || !phenotypeFile.getSpeciesId().equals(speciesMap.get(data.get(i)[0])) ||
-                           ObjectUtils.isEmpty(phenotypeFile.getPopulationId())  || ObjectUtils.isEmpty(populationsMap.get(data.get(i)[1])) || !phenotypeFile.getPopulationId().equals(populationsMap.get(data.get(i)[1]))||
-                           ObjectUtils.isEmpty(phenotypeFile.getYear()) || !phenotypeFile.getYear().equals(data.get(i)[2])||
-                           ObjectUtils.isEmpty(phenotypeFile.getLocation())  || !phenotypeFile.getLocation().equals(data.get(i)[3])){
-                            throw new ServiceException("文件中物种,群体,年份,地区存在冲突或为空");
-                        }
+                        //设置材料名称
+                        String materialId = data.get(i)[0];
+
                         insertSQLBuilder.append("(");
-                        for (int j = 0; j < 12; j++) {
+                        for (int j = 0; j < 3; j++) {
+                            if(j >= data.get(i).length || StringUtils.isEmpty(data.get(i)[j])) insertSQLBuilder.append("null");
+                            else if(j == 0) insertSQLBuilder.append(materialId);
+                            else if(j == 1) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
+                            else insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
+                            insertSQLBuilder.append(",");
+                        }
+                        /*for (int j = 0; j < 2; j++) {
                             if(j >= data.get(i).length || StringUtils.isEmpty(data.get(i)[j])) insertSQLBuilder.append("null");
                             else if(j == 0) insertSQLBuilder.append(speciesMap.get(data.get(i)[j]));
                             else if(j == 1) insertSQLBuilder.append(populationsMap.get(data.get(i)[j]));
@@ -334,7 +295,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             else if(j == 10) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
                             else insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
                             insertSQLBuilder.append(",");
-                        }
+                        }*/
+
                         //拼接性状列
                         for (int j = 0; j < traitId; j++) {
                             Long id = traitMap.get(headers[j + 12]);
@@ -373,7 +335,6 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     }
                     String insertSql = insertSQLBuilder.toString();
                     excuteMapper.excute(insertSql);
-                    asyncUtil.createGermplasmParents(germplasmParentsHashSet);
                 }catch (Exception e){
                     excuteMapper.excute("drop table if exists " + phenotypeFile.getTableName());
                     throw e;
@@ -389,231 +350,6 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         } else return null;
     }
 
-    /**
-     * 原育种上传文件方法
-     * 上传新文件
-     *//*
-    @Transactional
-    @Override
-    public String uploadFile(Long treeId, MultipartFile file, int fileStatus, String remark, String fileName) throws ServiceException, IOException {
-        Long userId = getUserId();
-        if (file!=null){
-            //获取原文件名
-            String filename = file.getOriginalFilename();
-            if (filename !=null){
-                //获取文件地址
-                String filePath = fileUtil.getFileUrl(filename,treeId);
-                //xlsx转csv
-                //获取后缀名
-                String suffixName = filename.substring(filename.lastIndexOf("."));
-                if (suffixName.equals(".xlsx")) {
-                    FileUtil.save(file,filePath);
-                    String newFilePath = filePath.substring(0,filePath.length() - 5) + ".csv";
-                    CsvUtils.xlsx2Csv(filePath,newFilePath);
-                    File delFile = new File(filePath);
-                    if(delFile.exists()){
-                        delFile.delete();
-                    }
-                    filePath = newFilePath;
-                    filename = filename.substring(0,filename.length() - 5) + ".csv";
-                 }else if(!suffixName.equals(".csv")){
-                    throw new ServiceException("文件格式错误");
-                }else{
-                    //1.保存文件
-                    boolean save = FileUtil.save(file, filePath);
-                    if (!save) throw new ServiceException("文件保存失败");
-                }
-                PhenotypeFile phenotypeFile = new PhenotypeFile();
-                phenotypeFile.setFileName(fileName);
-                phenotypeFile.setTableName("phenotype_" + fileName + "_" + RandomStringUtils.randomNumeric(6));
-                phenotypeFile.setUrl(filePath);
-                phenotypeFile.setRemark(remark);
-                phenotypeFile.setStatus(fileStatus);
-                phenotypeFile.setTreeId(treeId);
-                phenotypeFile.setCreateBy(getUserId().toString());
-
-                //2.表内数据入库
-                CsvReader csvReader = null;
-                String[] headers;
-                String[] r1;
-                try{
-                    csvReader = new CsvReader(filePath,',', Charset.forName("GBK"));
-                    if (csvReader.readRecord()) {
-                        headers = csvReader.getRawRecord().split(",");
-                    }
-                    else throw new ServiceException("缺少表头信息");
-                    //首行数据，拿到物种id，群体id，年份，位置,设置给表型文件
-                    if (csvReader.readRecord()) {
-                        r1 = csvReader.getRawRecord().split(",");
-                    }
-                    else throw new ServiceException("无数据");
-                    //拿物种 种群 性状列表
-                    HashMap<String, Long> populationsMap = infoUtil.getPopulationsMap();
-                    HashMap<String, Long> speciesMap = infoUtil.getSpeciesMap();
-                    HashMap<String, Long> traitMap = infoUtil.getTraitsMap();
-                    phenotypeFile.setSpeciesId(speciesMap.get(r1[0]));
-                    phenotypeFile.setPopulationId(populationsMap.get(r1[1]));
-                    phenotypeFile.setYear(r1[2]);
-                    phenotypeFile.setLocation(r1[3]);
-                    //如果物种，群体列表中没有对应的，就新建
-                    if (phenotypeFile.getSpeciesId() == null) {
-                        Species species = new Species();
-                        species.setSpeciesName(r1[0]);
-                        species.setCreateBy(userId.toString());
-                        speciesMapper.insertSpecies(species);
-                        species = speciesMapper.selectSpeciesListWithoutDeleted(species).get(0);
-                        phenotypeFile.setSpeciesId(species.getSpeciesId());
-                        speciesMap.put(species.getSpeciesName(),species.getSpeciesId());
-                    }
-                    if (phenotypeFile.getPopulationId() == null) {
-                        Population population = new Population();
-                        population.setPopulationName(r1[1]);
-                        population.setCreateBy(userId.toString());
-                        population.setSpeciesId(phenotypeFile.getSpeciesId());
-                        populationMapper.insertPopulation(population);
-                        population = populationMapper.selectPopulationListWithoutDeleted(population).get(0);
-                        phenotypeFile.setPopulationId(population.getPopulationId());
-                        populationsMap.put(population.getPopulationName(),population.getPopulationId());
-                    }
-                    //建表
-                    // 创建表的SQL语句
-                    StringBuilder createSQLBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS " + phenotypeFile.getTableName() + " (" +
-                            "phenotype_id bigint(20) AUTO_INCREMENT COMMENT '自增主键' PRIMARY KEY," +
-                            "species_id bigint(20) COMMENT '物种ID'," +
-                            "population_id bigint(20) COMMENT '群体ID'," +
-                            "`year` year COMMENT '数据采集年份'," +
-                            "location varchar(64) COMMENT '数据采集地区'," +
-                            "`repeat` bigint(20) COMMENT '重复实验'," +
-                            "kind_id varchar(64) COMMENT '品种ID'," +
-                            "kind_name varchar(64) COMMENT '品种名称'," +
-                            "material_id varchar(64) COMMENT '材料名称'," +
-                            "field_id bigint(200) COMMENT '田间编号'," +
-                            "control_type varchar(64) COMMENT '对照类型'," +
-                            "father varchar(64) COMMENT '父本'," +
-                            "mother varchar(64) COMMENT '母本'," +
-                            "create_by varchar(64) COMMENT '创建者'," +
-                            "create_time datetime COMMENT '创建者时间'," +
-                            "update_by varchar(64) COMMENT '更新者'," +
-                            "update_time datetime COMMENT '更新时间'," +
-                            "remark varchar(500) COMMENT '备注'"
-                            );
-                    // 添加性状列定义
-                    // 截取性状部分列 命名从0开始
-                    StringBuilder traitParam = new StringBuilder();
-                    int traitId = 0;
-                    for (int i = 12 ; i < headers.length - 1; i++) {
-                        traitParam.append(", trait_id_").append(traitId).append(" bigint(20), "); // 性状ID
-                        traitParam.append("trait_value_").append(traitId++).append(" varchar(100)");   // 性状值
-                    }
-                    createSQLBuilder.append(traitParam);
-                    // 添加表定义结尾
-                    createSQLBuilder.append(")COMMENT 'phenotype_文件名_六位数字串';");
-                    String createSql = createSQLBuilder.toString();
-                    // 执行建表语句
-                    excuteMapper.excute(createSql);
-                    //数据入库
-                    //拼接表头
-                    List<String[]> data = CsvUtils.read(filePath);
-                    StringBuilder insertSQLBuilder = new StringBuilder("INSERT INTO " + phenotypeFile.getTableName() +
-                            " (species_id,population_id,`year`,location,`repeat`," +
-                            "kind_id,kind_name,material_id,field_id,control_type,father," +
-                            "mother");
-                    traitId = 0;
-                    traitParam = new StringBuilder();
-                    for (int i = 12 ; i < headers.length - 1; i++) {
-                        traitParam.append(", trait_id_").append(traitId); // 性状ID
-                        traitParam.append(", trait_value_").append(traitId++);   // 性状值
-                    }
-                    insertSQLBuilder.append(traitParam);
-                    insertSQLBuilder.append(",remark,create_by,create_time) values");
-                    HashSet<GermplasmParents> germplasmParentsHashSet = new HashSet<>();
-                    HashSet<GermplasmParents> existgermplasmParentsHashSet = new HashSet<>(germplasmParentsMapper.getAllGermplasmParentsInfo());
-                    //拼接固定列
-                    for (int i = 1; i < data.size(); i++) {
-                        //提取材料,父,母信息
-                        GermplasmParents germplasmParents = new GermplasmParents();
-                        germplasmParents.setFather(data.get(i)[10]);
-                        germplasmParents.setMother(data.get(i)[11]);
-                        germplasmParents.setMaterialId(data.get(i)[7]);
-                        if(!existgermplasmParentsHashSet.contains(germplasmParents) && !StringUtils.isEmpty(germplasmParents.getFather()) && !StringUtils.isEmpty(germplasmParents.getMother()) && !StringUtils.isEmpty(germplasmParents.getMaterialId()))
-                            germplasmParentsHashSet.add(germplasmParents);
-                        //如果某行四个匹配字段不对，则不入库，报错返回
-                        if(ObjectUtils.isEmpty(phenotypeFile.getSpeciesId())  || ObjectUtils.isEmpty(speciesMap.get(data.get(i)[0])) || !phenotypeFile.getSpeciesId().equals(speciesMap.get(data.get(i)[0])) ||
-                           ObjectUtils.isEmpty(phenotypeFile.getPopulationId())  || ObjectUtils.isEmpty(populationsMap.get(data.get(i)[1])) || !phenotypeFile.getPopulationId().equals(populationsMap.get(data.get(i)[1]))||
-                           ObjectUtils.isEmpty(phenotypeFile.getYear()) || !phenotypeFile.getYear().equals(data.get(i)[2])||
-                           ObjectUtils.isEmpty(phenotypeFile.getLocation())  || !phenotypeFile.getLocation().equals(data.get(i)[3])){
-                            throw new ServiceException("文件中物种,群体,年份,地区存在冲突或为空");
-                        }
-                        insertSQLBuilder.append("(");
-                        for (int j = 0; j < 12; j++) {
-                            if(j >= data.get(i).length || StringUtils.isEmpty(data.get(i)[j])) insertSQLBuilder.append("null");
-                            else if(j == 0) insertSQLBuilder.append(speciesMap.get(data.get(i)[j]));
-                            else if(j == 1) insertSQLBuilder.append(populationsMap.get(data.get(i)[j]));
-                            else if(j == 2) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 3) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 4) insertSQLBuilder.append(data.get(i)[j]);
-                            else if(j == 5) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 6) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 7) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 8) insertSQLBuilder.append(data.get(i)[j]);
-                            else if(j == 9) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 10) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            insertSQLBuilder.append(",");
-                        }
-                        //拼接性状列
-                        for (int j = 0; j < traitId; j++) {
-                            Long id = traitMap.get(headers[j + 12]);
-                            String value = null;
-                            if (j + 12 < data.get(i).length)
-                                value = data.get(i)[j + 12];
-                            //如果性状id不在性状表中，则新增性状
-                            if (ObjectUtils.isEmpty(id)){
-                                //新增性状
-                                Trait trait = new Trait();
-                                trait.setTraitName(headers[j + 12]);
-                                trait.setCreateBy(String.valueOf(userId));
-                                traitMapper.insertTrait(trait);
-                                id = traitMapper.selectTraitListWithoutDeleted(trait).get(0).getTraitId();;
-                                traitMap.put(trait.getTraitName(),id);
-                            }
-                            if(ObjectUtils.isEmpty(id))
-                                insertSQLBuilder.append("null,");
-                            else
-                                insertSQLBuilder.append(id).append(",");
-                            if(StringUtils.isEmpty(value))
-                                insertSQLBuilder.append("null,");
-                            else
-                                insertSQLBuilder.append("'").append(value).append("'").append(",");
-                        }
-                        //拼接固定列 remark create_by create_time
-                        if (traitId + 12 < data.get(i).length) {
-                            insertSQLBuilder.append("'").append(data.get(i)[traitId + 12]).append("'");
-                        } else {
-                            insertSQLBuilder.append("null");
-                        }
-                        insertSQLBuilder.append(",");
-                        insertSQLBuilder.append(userId).append(",NOW()");
-                        insertSQLBuilder.append(")");
-                        if(i != data.size() - 1) insertSQLBuilder.append(",");
-                    }
-                    String insertSql = insertSQLBuilder.toString();
-                    excuteMapper.excute(insertSql);
-                    asyncUtil.createGermplasmParents(germplasmParentsHashSet);
-                }catch (Exception e){
-                    excuteMapper.excute("drop table if exists " + phenotypeFile.getTableName());
-                    throw e;
-                }finally {
-                    if (csvReader != null) {
-                        csvReader.close();
-                    }
-                }
-                //3.存文件表数据
-                phenotypeFileMapper.insertPhenotypeFile(phenotypeFile);
-                return phenotypeFile.getTableName();
-            } else return null;
-        } else return null;
-    }*/
 
     /**
      * 合并文件
