@@ -1,12 +1,9 @@
 package com.feidian.sidebarTree.mapper;
 
-import java.util.HashMap;
 import java.util.List;
-import com.feidian.sidebarTree.domain.Population;
-import com.feidian.sidebarTree.domain.PopulationUse;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.cache.annotation.Cacheable;
 
 /**
  * populationMapper接口

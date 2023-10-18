@@ -1,9 +1,7 @@
 package com.feidian.sidebarTree.mapper;
 
 import java.util.List;
-import java.util.Map;
 
-import com.feidian.sidebarTree.domain.Species;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

@@ -1,6 +1,5 @@
 package com.feidian.sidebarTree.utils;
 
-import com.feidian.sidebarTree.domain.GermplasmParents;
 import com.feidian.sidebarTree.mapper.GermplasmParentsMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;

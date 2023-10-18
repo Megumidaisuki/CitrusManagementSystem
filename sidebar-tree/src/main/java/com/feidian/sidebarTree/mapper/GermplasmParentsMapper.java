@@ -1,7 +1,6 @@
 package com.feidian.sidebarTree.mapper;
 
 
-import com.feidian.sidebarTree.domain.GermplasmParents;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

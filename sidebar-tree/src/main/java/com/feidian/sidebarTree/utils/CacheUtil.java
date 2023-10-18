@@ -1,6 +1,5 @@
 package com.feidian.sidebarTree.utils;
 
-import com.feidian.sidebarTree.domain.Population;
 import com.feidian.sidebarTree.mapper.PopulationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;

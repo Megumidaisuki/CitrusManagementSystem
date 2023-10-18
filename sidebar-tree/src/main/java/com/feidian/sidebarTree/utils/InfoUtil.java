@@ -1,14 +1,11 @@
 package com.feidian.sidebarTree.utils;
 
-import com.feidian.sidebarTree.domain.Population;
-import com.feidian.sidebarTree.domain.Species;
 import com.feidian.sidebarTree.domain.Trait;
 import com.feidian.sidebarTree.mapper.PopulationMapper;
 import com.feidian.sidebarTree.mapper.SpeciesMapper;
 import com.feidian.sidebarTree.mapper.TraitMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.List;

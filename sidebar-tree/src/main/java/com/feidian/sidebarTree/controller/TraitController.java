@@ -1,16 +1,12 @@
 package com.feidian.sidebarTree.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
-import com.feidian.sidebarTree.domain.Species;
 import com.feidian.sidebarTree.domain.vo.DataAnalysisVO;
 import com.feidian.sidebarTree.domain.vo.TraitVO;
-import org.apache.ibatis.annotations.Mapper;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

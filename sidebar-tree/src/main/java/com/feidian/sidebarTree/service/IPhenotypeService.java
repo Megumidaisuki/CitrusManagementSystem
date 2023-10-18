@@ -1,7 +1,6 @@
 package com.feidian.sidebarTree.service;
 
 import com.feidian.sidebarTree.domain.Phenotype;
-import com.feidian.sidebarTree.domain.Relationship;
 
 import java.util.List;
 import java.util.Map;
