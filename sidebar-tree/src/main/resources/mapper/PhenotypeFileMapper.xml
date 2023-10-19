@@ -260,6 +260,7 @@
         select count(*)
         from ${tableName}
     </select>
+
     <select id="getAllTraitIdColumnsWithSorted" resultType="java.lang.String">
         SELECT COLUMN_NAME
         FROM INFORMATION_SCHEMA.COLUMNS
@@ -267,6 +268,7 @@
           AND COLUMN_NAME like 'trait_id_%'
         ORDER BY ORDINAL_POSITION;
     </select>
+
     <select id="getAllTraitIdAndValueColumnsWithSorted" resultType="java.lang.String">
         SELECT COLUMN_NAME
         FROM INFORMATION_SCHEMA.COLUMNS
@@ -274,12 +276,13 @@
           AND (COLUMN_NAME like 'trait_id_%' OR COLUMN_NAME like 'trait_value_%')
         ORDER BY ORDINAL_POSITION;
     </select>
+
     <select id="selectTraitBindingByTableName" resultType="java.util.Map">
-        #         select * from ${tableName} where phenotype_id = 1;
         select ${columns}
         from ${tableName}
         where phenotype_id = 1;
     </select>
+    <!-- #     select * from ${tableName} where phenotype_id = 1;-->
     <!--    <select id="getAreaName" resultType="java.lang.String">-->
     <!--        select distinct(location)-->
     <!--        from phenotype_file-->
