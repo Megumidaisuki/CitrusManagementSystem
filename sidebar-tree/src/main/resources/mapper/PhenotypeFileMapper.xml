@@ -9,11 +9,6 @@
         <result property="fileName" column="file_name"/>
         <result property="tableName" column="table_name"/>
         <result property="treeId" column="tree_id"/>
-        <result property="speciesId" column="species_id"/>
-        <result property="populationId" column="population_id"/>
-        <result property="status" column="status"/>
-        <result property="year" column="year"/>
-        <result property="location" column="location"/>
         <result property="url" column="url"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
@@ -23,17 +18,7 @@
     </resultMap>
 
     <resultMap type="Phenotype" id="PhenotypeResult">
-        <result property="populationId" column="population_id"/>
-        <result property="year" column="year"/>
-        <result property="location" column="location"/>
-        <result property="repeat" column="repeat"/>
-        <result property="kindId" column="kind_id"/>
-        <result property="kindName" column="kind_name"/>
         <result property="materialId" column="material_id"/>
-        <result property="fieldId" column="field_id"/>
-        <result property="controlType" column="control_type"/>
-        <result property="father" column="father"/>
-        <result property="mother" column="mother"/>
         <result property="traitId" column="trait_id"/>
         <result property="traitValue" column="trait_value"/>
         <result property="createBy" column="create_by"/>
@@ -48,11 +33,7 @@
                file_name,
                table_name,
                tree_id,
-               species_id,
-               population_id,
                status,
-               year,
-               location,
                url,
                create_by,
                create_time,
@@ -70,10 +51,6 @@
             <if test="fileName != null  and fileName != ''">and file_name like concat('%', #{fileName}, '%')</if>
             <if test="tableName != null  and tableName != ''">and table_name like concat('%', #{tableName}, '%')</if>
             <if test="treeId != null ">and tree_id = #{treeId}</if>
-            <if test="speciesId != null ">and species_id = #{speciesId}</if>
-            <if test="populationId != null ">and population_id = #{populationId}</if>
-            <if test="year != null  and year != ''">and year = #{year}</if>
-            <if test="location != null  and location != ''">and location = #{location}</if>
             <if test="url != null  and url != ''">and url = #{url}</if>
             <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
             <if test="fileName == '' and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
@@ -89,10 +66,6 @@
             <if test="fileName != null  and fileName != ''">and file_name like concat('%', #{fileName}, '%')</if>
             <if test="tableName != null  and tableName != ''">and table_name like concat('%', #{tableName}, '%')</if>
             <if test="treeId != null ">and tree_id = #{treeId}</if>
-            <if test="speciesId != null ">and species_id = #{speciesId}</if>
-            <if test="populationId != null ">and population_id = #{populationId}</if>
-            <if test="year != null  and year != ''">and year = #{year}</if>
-            <if test="location != null  and location != ''">and location = #{location}</if>
             <if test="url != null  and url != ''">and url = #{url}</if>
             <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
             <if test="fileName == '' and tableName == null"> or status = 1 and tree_id = #{treeId}</if>
@@ -115,11 +88,7 @@
             <if test="fileName != null">file_name,</if>
             <if test="tableName != null">table_name,</if>
             <if test="treeId != null">tree_id,</if>
-            <if test="speciesId != null">species_id,</if>
-            <if test="populationId != null">population_id,</if>
             <if test="status != null">status,</if>
-            <if test="year != null">year,</if>
-            <if test="location != null">location,</if>
             <if test="url != null">url,</if>
             <if test="createBy != null">create_by,create_time,</if>
             <if test="remark != null">remark</if>
@@ -129,11 +98,7 @@
             <if test="fileName != null">#{fileName},</if>
             <if test="tableName != null">#{tableName},</if>
             <if test="treeId != null">#{treeId},</if>
-            <if test="speciesId != null">#{speciesId},</if>
-            <if test="populationId != null">#{populationId},</if>
             <if test="status != null">#{status},</if>
-            <if test="year != null">#{year},</if>
-            <if test="location != null">#{location},</if>
             <if test="url != null">#{url},</if>
             <if test="createBy != null">#{createBy},NOW(),</if>
             <if test="remark != null">#{remark},</if>
@@ -147,11 +112,7 @@
             <if test="fileName != null">file_name = #{fileName},</if>
             <if test="tableName != null">table_name = #{tableName},</if>
             <if test="treeId != null">tree_id = #{treeId},</if>
-            <if test="speciesId != null">species_id = #{speciesId},</if>
-            <if test="populationId != null">population_id = #{populationId},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="year != null">year = #{year},</if>
-            <if test="location != null">location = #{location},</if>
             <if test="url != null">url = #{url},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
@@ -266,13 +227,7 @@
     </select>
 
     <resultMap id="MaterialMap" type="com.feidian.sidebarTree.domain.Material">
-        <result column="kind_id" property="kindId"/>
-        <result column="kind_name" property="kindName"/>
         <result column="material_id" property="materialId"/>
-        <result column="field_id" property="fieldId"/>
-        <result column="control_type" property="controlType"/>
-        <result column="father" property="father"/>
-        <result column="mother" property="mother"/>
         <result column="tableName" property="tableName"/>
     </resultMap>
 
