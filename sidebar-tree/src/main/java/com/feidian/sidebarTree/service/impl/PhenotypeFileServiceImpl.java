@@ -222,11 +222,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         headers = csvReader.getRawRecord().split(",");
                     }
                     else throw new ServiceException("缺少表头信息");
-                    //首行数据，拿到物种id，群体id，年份，位置,设置给表型文件
+                    /*//首行数据，拿到物种id，群体id，年份，位置,设置给表型文件
                     if (csvReader.readRecord()) {
                         r1 = csvReader.getRawRecord().split(",");
                     }
-                    else throw new ServiceException("无数据");
+                    else throw new ServiceException("无数据");*/
                     //获取性状
                     HashMap<String, Long> traitMap = infoUtil.getTraitsMap();
 
@@ -238,102 +238,90 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             "create_by varchar(64) COMMENT '创建者'," +
                             "create_time datetime COMMENT '创建者时间'," +
                             "update_by varchar(64) COMMENT '更新者'," +
-                            "update_time datetime COMMENT '更新时间'," +
-                            "remark varchar(500) COMMENT '备注'"
+                            "update_time datetime COMMENT '更新时间'"
                             );
                     // 添加性状列定义
                     // 截取性状部分列 命名从0开始
                     StringBuilder traitParam = new StringBuilder();
                     int traitId = 0;
-                    for (int i = 12 ; i < headers.length - 1; i++) {
+                    for (int i = 1 ; i < headers.length - 1; i++) {
                         traitParam.append(", trait_id_").append(traitId).append(" bigint(20), "); // 性状ID
                         traitParam.append("trait_value_").append(traitId++).append(" varchar(100)");   // 性状值
                     }
                     createSQLBuilder.append(traitParam);
+                    // 添加备注
+                    createSQLBuilder.append(",remark varchar(64) COMMENT '备注'" );
                     // 添加表定义结尾
                     createSQLBuilder.append(")COMMENT 'phenotype_文件名_六位数字串';");
                     String createSql = createSQLBuilder.toString();
                     // 执行建表语句
                     excuteMapper.excute(createSql);
+
                     //数据入库
                     //拼接表头
                     List<String[]> data = CsvUtils.read(filePath);
                     StringBuilder insertSQLBuilder = new StringBuilder("INSERT INTO " + phenotypeFile.getTableName() +
-                            "(material_id");
+                            "(phenotype_id,material_id,create_by,create_time,update_by,update_time");
                     traitId = 0;
                     traitParam = new StringBuilder();
-                    for (int i = 12 ; i < headers.length - 1; i++) {
+                    for (int i = 1 ; i < headers.length - 1; i++) {
                         traitParam.append(", trait_id_").append(traitId); // 性状ID
                         traitParam.append(", trait_value_").append(traitId++);   // 性状值
                     }
                     insertSQLBuilder.append(traitParam);
-                    insertSQLBuilder.append(",remark,create_by,create_time) values");
+                    insertSQLBuilder.append(",remark) values");
                     //拼接固定列
                     for (int i = 1; i < data.size(); i++) {
                         //设置材料名称
                         String materialId = data.get(i)[0];
 
                         insertSQLBuilder.append("(");
-                        for (int j = 0; j < 3; j++) {
+                        for (int j = 0; j < 6; j++) {
                             if(j >= data.get(i).length || StringUtils.isEmpty(data.get(i)[j])) insertSQLBuilder.append("null");
-                            else if(j == 0) insertSQLBuilder.append(materialId);
-                            else if(j == 1) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
+                            else if(j == 0) insertSQLBuilder.append("NULL");
+                            else if(j == 1) insertSQLBuilder.append("'" + materialId + "'");
+                            else if(j == 2) insertSQLBuilder.append("'" + getLoginUser().getUsername() + "'");
+                            else if(j == 3) insertSQLBuilder.append("NOW()");
+                            else if(j == 4) insertSQLBuilder.append("'" + getLoginUser().getUsername() + "'");
+                            else if(j == 5) insertSQLBuilder.append("NOW()");
                             insertSQLBuilder.append(",");
                         }
-                        /*for (int j = 0; j < 2; j++) {
-                            if(j >= data.get(i).length || StringUtils.isEmpty(data.get(i)[j])) insertSQLBuilder.append("null");
-                            else if(j == 0) insertSQLBuilder.append(speciesMap.get(data.get(i)[j]));
-                            else if(j == 1) insertSQLBuilder.append(populationsMap.get(data.get(i)[j]));
-                            else if(j == 2) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 3) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 4) insertSQLBuilder.append(data.get(i)[j]);
-                            else if(j == 5) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 6) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 7) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 8) insertSQLBuilder.append(data.get(i)[j]);
-                            else if(j == 9) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else if(j == 10) insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            else insertSQLBuilder.append("'").append(data.get(i)[j]).append("'");
-                            insertSQLBuilder.append(",");
-                        }*/
+
 
                         //拼接性状列
-                        for (int j = 0; j < traitId; j++) {
-                            Long id = traitMap.get(headers[j + 12]);
+                        for (int j = 0; j < traitId ; j++) {
+                            Long id = traitMap.get(headers[j + 1]);
                             String value = null;
-                            if (j + 12 < data.get(i).length)
-                                value = data.get(i)[j + 12];
+                            value = data.get(i)[j + 1];
                             //如果性状id不在性状表中，则新增性状
                             if (ObjectUtils.isEmpty(id)){
                                 //新增性状
                                 Trait trait = new Trait();
-                                trait.setTraitName(headers[j + 12]);
+                                trait.setTraitName(headers[j + 1]);
                                 trait.setCreateBy(String.valueOf(userId));
                                 traitMapper.insertTrait(trait);
-                                id = traitMapper.selectTraitListWithoutDeleted(trait).get(0).getTraitId();;
+                                id = traitMapper.selectTraitListWithoutDeleted(trait).get(0).getTraitId();
                                 traitMap.put(trait.getTraitName(),id);
                             }
                             if(ObjectUtils.isEmpty(id))
                                 insertSQLBuilder.append("null,");
                             else
-                                insertSQLBuilder.append(id).append(",");
+                                insertSQLBuilder.append("'").append(id).append("'").append(",");
                             if(StringUtils.isEmpty(value))
                                 insertSQLBuilder.append("null,");
                             else
                                 insertSQLBuilder.append("'").append(value).append("'").append(",");
                         }
-                        //拼接固定列 remark create_by create_time
-                        if (traitId + 12 < data.get(i).length) {
-                            insertSQLBuilder.append("'").append(data.get(i)[traitId + 12]).append("'");
+                        //拼接固定列 remark
+                        if (traitId + 1 < data.get(i).length) {
+                            insertSQLBuilder.append("'").append(data.get(i)[traitId + 1]).append("'");
                         } else {
                             insertSQLBuilder.append("null");
                         }
-                        insertSQLBuilder.append(",");
-                        insertSQLBuilder.append(userId).append(",NOW()");
                         insertSQLBuilder.append(")");
                         if(i != data.size() - 1) insertSQLBuilder.append(",");
                     }
+                    insertSQLBuilder.append(";");
                     String insertSql = insertSQLBuilder.toString();
                     excuteMapper.excute(insertSql);
                 }catch (Exception e){
