@@ -150,10 +150,9 @@ public class TraitServiceImpl implements ITraitService
         return traitVOS;
     }
 
-    @Override
+    /*@Override
     @Cacheable(value = "listLocationByTraitId",key = "#id")
     public Set<String> listLocationByTraitId(Long id) {
-
         List<PhenotypeFile> phenotypeFiles = phenotypeFileMapper.selectAll();
         Set<String> locationres =new HashSet<>();
         for(PhenotypeFile file: phenotypeFiles){
@@ -178,7 +177,7 @@ public class TraitServiceImpl implements ITraitService
             }
         }
         return locationres;
-    }
+    }*/
 
 
     public boolean traitIsExist(List<DataAnalysisVO> list,String traitName){

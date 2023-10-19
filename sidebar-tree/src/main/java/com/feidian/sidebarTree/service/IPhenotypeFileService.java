@@ -99,7 +99,7 @@ public interface IPhenotypeFileService {
 
     public List<List<Map.Entry<String, Integer>>> selectTraitByFileId(Long fileId,int pageSize,int pageNum);
 
-    List getAreaData();
+    /*List getAreaData();*/
 
     boolean mergeFile(MultipartFile file, String tableName, String remark, String fileName) throws IOException;
 
@@ -109,8 +109,8 @@ public interface IPhenotypeFileService {
 
     List<PhenotypeDetailVO> selectDetailByFileId(Long fileId, boolean startPage);
 
-    //根据地区获取所有性状
-    List<Trait> selectTraitByLocation(String location);
+    /*//根据地区获取所有性状
+    List<Trait> selectTraitByLocation(String location);*/
 
     void updatePhenoTypeFile(Long fileId,Long phenotypeId, HashMap<String, String> map);
 

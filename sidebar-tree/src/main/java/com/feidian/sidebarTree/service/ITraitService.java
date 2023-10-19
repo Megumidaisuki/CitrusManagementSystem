@@ -66,7 +66,7 @@ public interface ITraitService
 
     List<TraitVO> listAllByType();
 
-    Set<String> listLocationByTraitId(Long id);
+    /*Set<String> listLocationByTraitId(Long id);*/
 
     List<DataAnalysisVO> dataAnalysis(Long id);
 

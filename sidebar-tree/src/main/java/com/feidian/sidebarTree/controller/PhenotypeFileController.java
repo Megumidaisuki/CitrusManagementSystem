@@ -260,17 +260,17 @@ public class PhenotypeFileController extends BaseController
         return  AjaxResult.success(list);
     }
 
-    /*获取所有地区数据*/
+    /*获取所有地区数据*//*
     @Log(title = "表型文件", businessType = BusinessType.GRANT)
     @GetMapping("/getAreaData")
     public AjaxResult getAreaData()
     {
         List areas = phenotypeFileService.getAreaData();
         return  AjaxResult.success(areas);
-    }
+    }*/
 
 
-    /*根据性状名上获取地区*/
+    /*根据性状名上获取地区*//*
     @Log(title = "表型文件", businessType = BusinessType.GRANT)
     @GetMapping("/selectTraitByLocation")
     public AjaxResult selectTraitByLocation(String location)
@@ -279,7 +279,7 @@ public class PhenotypeFileController extends BaseController
         phenotypeFile.setLocation(location);
         List<Trait> result = phenotypeFileService.selectTraitByLocation(location);
         return  AjaxResult.success(result);
-    }
+    }*/
 
 
     @GetMapping("/getMaterialIdByFileId")
@@ -328,10 +328,10 @@ public class PhenotypeFileController extends BaseController
         for(Map.Entry<String,String[]> map:parameterMap.entrySet()){
             String key = map.getKey();
             String[] value = map.getValue();
-            if (key.contains("repeat") || key.contains("kind_id") ||
+            if (/*key.contains("repeat") || key.contains("kind_id") ||
                     key.contains("kind_name") || key.contains("material_id") ||
                     key.contains("field_id") || key.contains("control_type") ||
-                    key.contains("father") || key.contains("mother") ||
+                    key.contains("father") || key.contains("mother") ||*/
                     key.contains("remark") || key.contains("trait_id")) {
                 if(key.contains("trait_id")) {
                     String[] s = key.split("_");

@@ -30,124 +30,26 @@ public class PhenotypeFile extends BaseEntity
         @Excel(name = "树节点id")
         private Long treeId;
 
-        /** 物种ID */
-        @Excel(name = "物种ID")
-        private Long speciesId;
-
-        /** 群体ID */
-        @Excel(name = "群体ID")
-        private Long populationId;
-
         /** 是否公开 */
         @Excel(name = "是否公开")
         private int status;
-
-        /** 数据采集年份 */
-        @Excel(name = "数据采集年份")
-        private String year;
-
-        /** 数据采集地区 */
-        @Excel(name = "数据采集地区")
-        private String location;
 
         /** 数据路径url */
         @Excel(name = "数据路径url")
         private String url;
 
-        public void setFileId(Long fileId)
-        {
+        public PhenotypeFile() {
+        }
+
+        public PhenotypeFile(Long fileId, String fileName, String tableName, Long treeId, int status, String url) {
                 this.fileId = fileId;
-        }
-
-        public Long getFileId()
-        {
-                return fileId;
-        }
-        public void setFileName(String fileName)
-        {
                 this.fileName = fileName;
-        }
-
-        public String getFileName()
-        {
-                return fileName;
-        }
-        public void setTableName(String tableName)
-        {
                 this.tableName = tableName;
-        }
-
-        public String getTableName()
-        {
-                return tableName;
-        }
-        public void setTreeId(Long treeId)
-        {
                 this.treeId = treeId;
-        }
-
-        public Long getTreeId()
-        {
-                return treeId;
-        }
-        public void setSpeciesId(Long speciesId)
-        {
-                this.speciesId = speciesId;
-        }
-
-        public Long getSpeciesId()
-        {
-                return speciesId;
-        }
-        public void setPopulationId(Long populationId)
-        {
-                this.populationId = populationId;
-        }
-
-        public Long getPopulationId()
-        {
-                return populationId;
-        }
-        public void setStatus(int status)
-        {
                 this.status = status;
-        }
-
-        public int getStatus()
-        {
-                return status;
-        }
-        public void setYear(String year)
-        {
-                this.year = year;
-        }
-
-        public String getYear()
-        {
-                return year;
-        }
-        public void setLocation(String location)
-        {
-                this.location = location;
-        }
-
-        public String getLocation()
-        {
-                return location;
-        }
-        public void setUrl(String url)
-        {
                 this.url = url;
         }
 
-        public String getUrl()
-        {
-                return url;
-        }
-
-        public static long getSerialVersionUID() {
-                return serialVersionUID;
-        }
 
         @Override
         public String toString() {
@@ -156,11 +58,7 @@ public class PhenotypeFile extends BaseEntity
                         .append("fileName", getFileName())
                         .append("tableName", getTableName())
                         .append("treeId", getTreeId())
-                        .append("speciesId", getSpeciesId())
-                        .append("populationId", getPopulationId())
                         .append("status", getStatus())
-                        .append("year", getYear())
-                        .append("location", getLocation())
                         .append("url", getUrl())
                         .append("createBy", getCreateBy())
                         .append("createTime", getCreateTime())
@@ -168,5 +66,101 @@ public class PhenotypeFile extends BaseEntity
                         .append("updateTime", getUpdateTime())
                         .append("remark", getRemark())
                         .toString();
+        }
+
+        /**
+         * 获取
+         * @return fileId
+         */
+        public Long getFileId() {
+                return fileId;
+        }
+
+        /**
+         * 设置
+         * @param fileId
+         */
+        public void setFileId(Long fileId) {
+                this.fileId = fileId;
+        }
+
+        /**
+         * 获取
+         * @return fileName
+         */
+        public String getFileName() {
+                return fileName;
+        }
+
+        /**
+         * 设置
+         * @param fileName
+         */
+        public void setFileName(String fileName) {
+                this.fileName = fileName;
+        }
+
+        /**
+         * 获取
+         * @return tableName
+         */
+        public String getTableName() {
+                return tableName;
+        }
+
+        /**
+         * 设置
+         * @param tableName
+         */
+        public void setTableName(String tableName) {
+                this.tableName = tableName;
+        }
+
+        /**
+         * 获取
+         * @return treeId
+         */
+        public Long getTreeId() {
+                return treeId;
+        }
+
+        /**
+         * 设置
+         * @param treeId
+         */
+        public void setTreeId(Long treeId) {
+                this.treeId = treeId;
+        }
+
+        /**
+         * 获取
+         * @return status
+         */
+        public int getStatus() {
+                return status;
+        }
+
+        /**
+         * 设置
+         * @param status
+         */
+        public void setStatus(int status) {
+                this.status = status;
+        }
+
+        /**
+         * 获取
+         * @return url
+         */
+        public String getUrl() {
+                return url;
+        }
+
+        /**
+         * 设置
+         * @param url
+         */
+        public void setUrl(String url) {
+                this.url = url;
         }
 }

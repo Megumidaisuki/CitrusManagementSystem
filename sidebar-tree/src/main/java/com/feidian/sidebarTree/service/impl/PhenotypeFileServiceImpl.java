@@ -398,9 +398,9 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 //不存在的列在csv表中的列索引
                 ArrayList<Integer> columErrorIndex = new ArrayList<>();
                 boolean newColumn = false;
-                if (columns.size() - 18 != (headersList.size() - 13) * 2){
+                if (columns.size() - 6 != (headersList.size() - 1) * 2){
                     HashMap<String, Long> traitMap = infoUtil.getTraitsMap();
-                    long tableTraitColumnCount = (columns.size() - 18L) / 2;
+                    long tableTraitColumnCount = (columns.size() - 6L) / 2;
                     //拿到扩列
                     Object[] columnErrorArray = createColumnIndex(headers, tableName, true);
                     for (Object o : columnErrorArray) {
@@ -509,7 +509,6 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     excuteMapper.excute(insertSql);
                 // 8.  表型文件表新增记录
                 phenotypeFile.setFileId(null);
-                phenotypeFile.setYear(phenotypeFile.getYear().substring(0,4));
                 phenotypeFile.setFileName(fileName);
                 phenotypeFile.setRemark(remark);
                 phenotypeFileMapper.insertPhenotypeFile(phenotypeFile);
@@ -556,30 +555,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         boolean nullFlag = false;
         for (int i = 0; i < headers.length; i++) {
             if(!StringUtils.isEmpty(headers[i])){
-                if (headers[i].equals("物种")){
+                if (headers[i].equals("材料名称")){
                     indexArray[0] =i;
-                }else if (headers[i].equals("群体")){
-                    indexArray[1] = i;
-                }else if (headers[i].equals("年份")){
-                    indexArray[2] = i;
-                }else if (headers[i].equals("地区")){
-                    indexArray[3] = i;
-                }else if (headers[i].equals("重复试验")){
-                    indexArray[4] = i;
-                }else if (headers[i].equals("品种ID")){
-                    indexArray[5] = i;
-                }else if (headers[i].equals("品种名称")){
-                    indexArray[6] = i;
-                }else if (headers[i].equals("材料名称")){
-                    indexArray[7] = i;
-                }else if (headers[i].equals("田间编号")){
-                    indexArray[8] = i;
-                }else if (headers[i].equals("对照类型")){
-                    indexArray[9] = i;
-                }else if (headers[i].equals("父本")){
-                    indexArray[10] = i;
-                }else if (headers[i].equals("母本")){
-                    indexArray[11] = i;
                 }else if (headers[i].equals("备注")){
                     indexArray[12] = i;
                 }else { //性状列
@@ -634,12 +611,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         }
         if(ObjectUtils.isEmpty(phenotypeFile.getStatus())&&ObjectUtils.isEmpty(phenotypeFile.getRemark())
                 ||!ObjectUtils.isEmpty(phenotypeFile.getTreeId())
-                ||!ObjectUtils.isEmpty(phenotypeFile.getSpeciesId())
-                ||!ObjectUtils.isEmpty(phenotypeFile.getPopulationId())
-                ||!ObjectUtils.isEmpty(phenotypeFile.getYear())
 //                ||!StringUtils.isEmpty(phenotypeFile.getFileName())
                 ||!StringUtils.isEmpty(phenotypeFile.getTableName())
-                ||!StringUtils.isEmpty(phenotypeFile.getLocation())
                 ||!StringUtils.isEmpty(phenotypeFile.getUrl())
                 ||!StringUtils.isEmpty(phenotypeFile.getCreateBy())){
         throw new RuntimeException("只能修改status,remark,且不为空");
@@ -861,11 +834,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         return res;
     }
 
-    @Override
+    /*@Override
     public List getAreaData() {
         List<Map<String, Object>> areaName = phenotypeFileMapper.getAreaName();
         return areaName;
-    }
+    }*/
 
     @Override
     public List<Trait> selectTraitColByFileId(Long fileId) {
@@ -921,12 +894,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         System.out.println("phenotypeFile"+phenotypeFile);
 
         Long fileId1 = phenotypeFile.getFileId();
-        String location = phenotypeFile.getLocation();
-        Long populationId = phenotypeFile.getPopulationId();
         int status = phenotypeFile.getStatus();
         String fileName = phenotypeFile.getFileName();
-        Long speciesId = phenotypeFile.getSpeciesId();
-
 
         //获取tableName下的所有表名，方便列举
         List<String> allColumns = phenotypeFileMapper.getAllColumns(tableName);
@@ -1103,7 +1072,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         return res;
     }
 
-    @Override
+    /*@Override
     public List<Trait> selectTraitByLocation(String location){
         List<PhenotypeFile> phenotypeFiles = phenotypeFileMapper.selectLatestFileByLocation(location);
         Set<Long> traitIdset =new HashSet<>();
@@ -1130,7 +1099,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 list.add(trait);
         }
         return list;
-    }
+    }*/
 
 
     /**

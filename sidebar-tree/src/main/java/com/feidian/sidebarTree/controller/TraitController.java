@@ -113,7 +113,7 @@ public class TraitController extends BaseController
     }
 
 
-    @GetMapping("/listLocationByTraitId")
+    /*@GetMapping("/listLocationByTraitId")
     public AjaxResult listLocationByTraitId(String name){
         Trait trait =new Trait();
         trait.setTraitName(name);
@@ -122,7 +122,7 @@ public class TraitController extends BaseController
             return AjaxResult.error("性状名不存在");
         Set<String> result =  traitService.listLocationByTraitId(traits.get(0).getTraitId());
         return AjaxResult.success(result);
-    }
+    }*/
 
 
     @GetMapping("/dataAnalysis")
