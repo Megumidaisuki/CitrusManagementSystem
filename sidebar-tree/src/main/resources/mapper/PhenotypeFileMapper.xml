@@ -282,7 +282,6 @@
         from ${tableName}
         where phenotype_id = 1;
     </select>
-    <!-- #     select * from ${tableName} where phenotype_id = 1;-->
     <!--    <select id="getAreaName" resultType="java.lang.String">-->
     <!--        select distinct(location)-->
     <!--        from phenotype_file-->

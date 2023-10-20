@@ -238,7 +238,9 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             "create_by varchar(64) COMMENT '创建者'," +
                             "create_time datetime COMMENT '创建者时间'," +
                             "update_by varchar(64) COMMENT '更新者'," +
-                            "update_time datetime COMMENT '更新时间'"
+                            "update_time datetime COMMENT '更新时间'," +
+                            // 添加备注
+                            "remark varchar(64) COMMENT '备注'"
                             );
                     // 添加性状列定义
                     // 截取性状部分列 命名从0开始
@@ -249,8 +251,6 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         traitParam.append("trait_value_").append(traitId++).append(" varchar(100)");   // 性状值
                     }
                     createSQLBuilder.append(traitParam);
-                    // 添加备注
-                    createSQLBuilder.append(",remark varchar(64) COMMENT '备注'" );
                     // 添加表定义结尾
                     createSQLBuilder.append(")COMMENT 'phenotype_文件名_六位数字串';");
                     String createSql = createSQLBuilder.toString();
@@ -261,7 +261,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     //拼接表头
                     List<String[]> data = CsvUtils.read(filePath);
                     StringBuilder insertSQLBuilder = new StringBuilder("INSERT INTO " + phenotypeFile.getTableName() +
-                            "(phenotype_id,material_id,create_by,create_time,update_by,update_time");
+                            "(phenotype_id,material_id,create_by,create_time,update_by,update_time,remark");
                     traitId = 0;
                     traitParam = new StringBuilder();
                     for (int i = 1 ; i < headers.length - 1; i++) {
@@ -269,7 +269,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         traitParam.append(", trait_value_").append(traitId++);   // 性状值
                     }
                     insertSQLBuilder.append(traitParam);
-                    insertSQLBuilder.append(",remark) values");
+                    insertSQLBuilder.append(") values");
                     //拼接固定列
                     for (int i = 1; i < data.size(); i++) {
                         //设置材料名称
@@ -286,8 +286,12 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             else if(j == 5) insertSQLBuilder.append("NOW()");
                             insertSQLBuilder.append(",");
                         }
-
-
+                        //拼接固定列 remark
+                        if (traitId + 6 < data.get(i).length) {
+                            insertSQLBuilder.append("'").append(data.get(i)[traitId + 1]).append("'");
+                        } else {
+                            insertSQLBuilder.append("null,");
+                        }
                         //拼接性状列
                         for (int j = 0; j < traitId ; j++) {
                             Long id = traitMap.get(headers[j + 1]);
@@ -310,14 +314,10 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             if(StringUtils.isEmpty(value))
                                 insertSQLBuilder.append("null,");
                             else
-                                insertSQLBuilder.append("'").append(value).append("'").append(",");
+                                insertSQLBuilder.append("'").append(value).append("'");
+                            if(j < traitId - 1) insertSQLBuilder.append(",");
                         }
-                        //拼接固定列 remark
-                        if (traitId + 1 < data.get(i).length) {
-                            insertSQLBuilder.append("'").append(data.get(i)[traitId + 1]).append("'");
-                        } else {
-                            insertSQLBuilder.append("null");
-                        }
+
                         insertSQLBuilder.append(")");
                         if(i != data.size() - 1) insertSQLBuilder.append(",");
                     }
@@ -414,7 +414,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         if (columnErrorHashSet.contains(headersList.get(i))) {
                             newColumn = true;
                             columErrorIndex.add(i);
-                            id = traitMap.get(headersList.get(i));
+                             id = traitMap.get(headersList.get(i));
                             //如果性状id不在性状表中，则新增性状
                             if (ObjectUtils.isEmpty(id)){
                                 //新增性状
@@ -558,7 +558,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 if (headers[i].equals("材料名称")){
                     indexArray[0] =i;
                 }else if (headers[i].equals("备注")){
-                    indexArray[12] = i;
+                    indexArray[24] = i;
                 }else { //性状列
                     Long traitId = traitMap.get(headers[i]);
                     if (ObjectUtils.isEmpty(traitId)) {
