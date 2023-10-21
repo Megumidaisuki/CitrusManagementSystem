@@ -3,15 +3,26 @@ package com.feidian.sidebarTree.domain.vo;
 public class DataAnalysisVO {
     private Long triatId;
     private String traitName;
+    private Double value;
     private Double average;
     private Double maxNum;
     private Double minNum;
+
+    public DataAnalysisVO(Long triatId, String traitName, Double value, Double average, Double maxNum, Double minNum) {
+        this.triatId = triatId;
+        this.traitName = traitName;
+        this.value = value;
+        this.average = average;
+        this.maxNum = maxNum;
+        this.minNum = minNum;
+    }
 
     @Override
     public String toString() {
         return "DataAnalysisVO{" +
                 "triatId=" + triatId +
                 ", traitName='" + traitName + '\'' +
+                ", value=" + value +
                 ", average=" + average +
                 ", maxNum=" + maxNum +
                 ", minNum=" + minNum +
@@ -67,5 +78,21 @@ public class DataAnalysisVO {
 
     public void setMinNum(Double minNum) {
         this.minNum = minNum;
+    }
+
+    /**
+     * 获取
+     * @return value
+     */
+    public Double getValue() {
+        return value;
+    }
+
+    /**
+     * 设置
+     * @param value
+     */
+    public void setValue(Double value) {
+        this.value = value;
     }
 }

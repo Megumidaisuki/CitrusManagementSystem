@@ -8,15 +8,13 @@ import com.feidian.common.utils.StringUtils;
 import com.feidian.sidebarTree.domain.*;
 import com.feidian.sidebarTree.domain.vo.DataAnalysisVO;
 import com.feidian.sidebarTree.domain.vo.TraitVO;
-import com.feidian.sidebarTree.mapper.AsTraitTypeMapper;
-import com.feidian.sidebarTree.mapper.PhenotypeFileMapper;
-import com.feidian.sidebarTree.mapper.TraitTypeMapper;
+import com.feidian.sidebarTree.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import com.feidian.sidebarTree.mapper.TraitMapper;
 import com.feidian.sidebarTree.service.ITraitService;
+import com.feidian.sidebarTree.utils.InfoUtil;
 
 /**
  * 【请填写功能名称】Service业务层处理
@@ -27,6 +25,10 @@ import com.feidian.sidebarTree.service.ITraitService;
 @Service
 public class TraitServiceImpl implements ITraitService
 {
+
+    @Autowired
+    private ExcuteMapper excuteMapper;
+
     @Autowired
     private TraitMapper traitMapper;
 
@@ -38,6 +40,10 @@ public class TraitServiceImpl implements ITraitService
 
     @Autowired
     private PhenotypeFileMapper phenotypeFileMapper;
+
+    @Autowired
+    private InfoUtil infoUtil;
+
     /**
      * 查询【请填写功能名称】
      *
@@ -385,6 +391,8 @@ public class TraitServiceImpl implements ITraitService
 
     @Override
     public List<DataAnalysisVO> dataAnalysisBymaterialId(Long id, String materialId) {
+
+
         List<String> result = new ArrayList<>();
         PhenotypeFile file = phenotypeFileMapper.selectPhenotypeFileByFileId(id);
         System.out.println(file);
@@ -407,6 +415,43 @@ public class TraitServiceImpl implements ITraitService
 
         //获取所有信息
         List<Map<String, Object>> maps = phenotypeFileMapper.selectAllColumns(tableName);
+        //获取我们想要查询的单个的材料的数据
+        Map<String,Double> wannaMap = new HashMap<>();
+
+        //获取性状
+        HashMap<Long, String> traitMap = infoUtil.getTraitsMapReverse();
+
+        //遍历每一行
+        for (int i = 0; i < maps.size(); i++) {
+            //从maps中以此获取想要的数据
+            Map<String, Object> map = maps.get(i);
+
+            for (String dataAnalysisVO : result){
+                String traitref = dataAnalysisVO;
+                Long traitId = Long.valueOf((map.get(traitref)).toString());
+                String traitName = traitMap.get(traitId);
+                String traitValue = traitref.replace("id", "value");
+                System.out.println(traitValue);
+                Object o = map.get(traitValue);
+                if(o==null||StringUtils.equals(o.toString(),"NA")) {
+                    continue;
+                }
+                Double value = Double.valueOf(o.toString());
+                if(value!=0||value!=null){
+                    List<Double> doubles;
+                    if(datanumber.containsKey(traitName)){
+                        doubles = datanumber.get(traitName);
+                        doubles.add(value);
+                    }
+                    else{
+                        doubles =new ArrayList<>();
+                        doubles.add(value);
+                    }
+                    datanumber.put(traitName,doubles);
+                }
+            }
+        }
+
         //遍历每一行
         for (int i = 0; i < maps.size(); i++) {
             //从maps中以此获取想要的数据
@@ -419,7 +464,7 @@ public class TraitServiceImpl implements ITraitService
             for (String dataAnalysisVO : result){
                 String traitref = dataAnalysisVO;
                 Long traitId = Long.valueOf((map.get(traitref)).toString());
-                Trait trait = traitMapper.selectTraitByTraitIdWithoutDeleted(traitId);
+                String traitName = traitMap.get(traitId);
                 String traitValue = traitref.replace("id", "value");
                 System.out.println(traitValue);
                 Object o = map.get(traitValue);
@@ -428,19 +473,8 @@ public class TraitServiceImpl implements ITraitService
                 }
                 Double value = Double.valueOf(o.toString());
                 if(value!=0||value!=null){
-                    List<Double> doubles;
-                    String traitName = trait.getTraitName();
-                    if(datanumber.containsKey(traitName)){
-                        doubles = datanumber.get(traitName);
-                        doubles.add(value);
-                    }
-                    else{
-                        doubles =new ArrayList<>();
-                        doubles.add(value);
-                    }
-                    datanumber.put(traitName,doubles);
+                    wannaMap.put(traitName,value);
                 }
-
             }
         }
 
@@ -466,15 +500,14 @@ public class TraitServiceImpl implements ITraitService
                 DataAnalysisVO dataAnalysisVO =new DataAnalysisVO(
                         trait.getTraitId(),
                         trait.getTraitName(),
+                        wannaMap.get(name),
                         max,
                         min,
                         average);
                 res.add(dataAnalysisVO);
             }
         }
-
         return res;
-
     }
 
     //1.6 大查询 模糊匹配 根据性状名称模糊匹配
