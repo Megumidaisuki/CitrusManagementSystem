@@ -141,8 +141,9 @@ public class PhenotypeFileController extends BaseController
      * @return {@link AjaxResult}
      */
     @PostMapping("/upload")//新建一个文件和表
-    public AjaxResult upload(Long treeId, @RequestParam("file") MultipartFile file, int status, String remark, String fileName)throws Exception {
-        String tableName = phenotypeFileService.uploadFile(treeId, file, status, remark, fileName);
+    //该接口多传一个参数pointStatus，若为1则代表普通上传，若为0则代表大文件上传
+    public AjaxResult upload(Long treeId, @RequestParam("file") MultipartFile file, int status, String remark, String fileName,int pointStatus)throws Exception {
+        String tableName = phenotypeFileService.uploadFile(treeId, file, status, remark, fileName,pointStatus);
         if(!StringUtils.isEmpty(tableName)){
             phenotypeFileService.waitUpdate(tableName);
             return AjaxResult.success("上传成功");

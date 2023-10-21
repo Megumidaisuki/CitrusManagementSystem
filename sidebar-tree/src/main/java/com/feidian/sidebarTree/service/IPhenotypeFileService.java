@@ -66,7 +66,7 @@ public interface IPhenotypeFileService {
      */
     public int deletePhenotypeFileByFileId(Long fileId);
 
-    String uploadFile(Long treeId, MultipartFile file, int fileStatus, String remark, String fileName) throws ServiceException, IOException;
+    String uploadFile(Long treeId, MultipartFile file, int fileStatus, String remark, String fileName,int pointStatus) throws ServiceException, IOException;
 
     /**
      * 在表型文件表里根据FileId查TableName
