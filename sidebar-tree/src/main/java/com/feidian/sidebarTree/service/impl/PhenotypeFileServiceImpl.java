@@ -1,5 +1,6 @@
 package com.feidian.sidebarTree.service.impl;
 
+import com.alibaba.druid.sql.ast.statement.SQLForeignKeyImpl;
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
 import com.feidian.common.core.domain.entity.SysRole;
@@ -59,20 +60,12 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
     @Autowired
     private PhenotypeFileMapper phenotypeFileMapper;
 
-    /*@Autowired
-    private PopulationMapper populationMapper;
-
-    @Autowired
-    private SpeciesMapper speciesMapper;*/
-
     @Autowired
     private TraitMapper traitMapper;
 
     @Autowired
     private ExcuteMapper excuteMapper;
 
-   /* @Autowired
-    private GermplasmParentsMapper germplasmParentsMapper;*/
 
     @Autowired
     private FileUtil fileUtil;
@@ -239,7 +232,6 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             "create_time datetime COMMENT '创建者时间'," +
                             "update_by varchar(64) COMMENT '更新者'," +
                             "update_time datetime COMMENT '更新时间'," +
-                            // 添加备注
                             "remark varchar(64) COMMENT '备注'"
                             );
                     // 添加性状列定义
@@ -402,9 +394,16 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     HashMap<String, Long> traitMap = infoUtil.getTraitsMap();
                     long tableTraitColumnCount = (columns.size() - 6L) / 2;
                     //拿到扩列
+//                    Object[] columnErrorArray = createColumnIndex(headers, tableName, true);
+//                    for (Object o : columnErrorArray) {
+//                        columnErrorList.add((String) o);
+//                    }
                     Object[] columnErrorArray = createColumnIndex(headers, tableName, true);
-                    for (Object o : columnErrorArray) {
-                        columnErrorList.add((String) o);
+                    String[] stringColumnArray = new String[columnErrorArray.length]; // 创建一个新的字符串数组
+
+                    for (int i = 0; i < columnErrorArray.length; i++) {
+                        stringColumnArray[i] = String.valueOf(columnErrorArray[i]); // 将整数转换为字符串
+                        columnErrorList.add(stringColumnArray[i]); // 添加到列表中
                     }
                     HashSet<String> columnErrorHashSet = new HashSet<>(columnErrorList);
                     //遍历表头
@@ -447,7 +446,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 // 7.1 对旧行的新列填充数据 预备
                 StringBuilder insertOldLineStringBuilder = new StringBuilder("insert into ").append(tableName).append(" (phenotype_id,");
                 ArrayList<String> newColumnString = new ArrayList<>();
-                long lineCount = (columns.size() - 18L) / 2;
+                long lineCount = (columns.size() - 7L) / 2;
                 for (int i = 0; i < columErrorIndex.size(); i++) {
                     newColumnString.add("trait_value_" + lineCount);
                     insertOldLineStringBuilder.append("trait_value_").append(lineCount).append(",");
@@ -458,12 +457,12 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 long count = 0L;
                 HashMap<String, Long> traitsMap = infoUtil.getTraitsMap();
 
-                StringBuilder insertSqlBuilder = new StringBuilder("insert into " + tableName + " (material_id");
+                StringBuilder insertSqlBuilder = new StringBuilder("insert into " + tableName + " (phenotype_id,material_id,create_by,create_time,update_by,update_time,remark");
                 List<String> traitParam = phenotypeFileMapper.getAllTraitIdAndValueColumnsWithSorted(tableName);
                 for (String param : traitParam) {
                     insertSqlBuilder.append(",").append(param);
                 }
-                insertSqlBuilder.append(",create_by,create_time) values");
+                insertSqlBuilder.append(") values");
                 while(csvReader.readRecord()){
                     //行扩增
                     if(count >= tableLines) {
@@ -551,14 +550,16 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         }
         //按已排序性状列查出的首行 trait_id Map
         Map<String, Object> columnsValueMap = phenotypeFileMapper.selectTraitBindingByTableName(columnBuilder.toString(), tableName);
+        //这是查出来的原本在数据库的表的性状列的性状id
         Map<Object, String> valueColumnsMap = columnsValueMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
         boolean nullFlag = false;
         for (int i = 0; i < headers.length; i++) {
             if(!StringUtils.isEmpty(headers[i])){
                 if (headers[i].equals("材料名称")){
                     indexArray[0] =i;
                 }else if (headers[i].equals("备注")){
-                    indexArray[24] = i;
+                    indexArray[1] = i;
                 }else { //性状列
                     Long traitId = traitMap.get(headers[i]);
                     if (ObjectUtils.isEmpty(traitId)) {
@@ -572,7 +573,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     if (errorList.isEmpty() || nullFlag) {
                         try {
                             String[] attribute = valueColumnsMap.get(traitId).split("_");
-                            indexArray[(int) (Long.parseLong(attribute[attribute.length - 1]) + 13)] = i;
+                            indexArray[(int) (Long.parseLong(attribute[attribute.length - 1]) + 2)] = i;
                         } catch (Exception e) {
                             errorList.add(headers[i]);
                             //如果出现空列，后面的列就单判异常

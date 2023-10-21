@@ -24,7 +24,7 @@ import com.feidian.common.core.page.TableDataInfo;
  * @date 2023-07-03
  */
 @RestController
-@RequestMapping("/traitType")
+@RequestMapping("Type")
 public class TraitTypeController extends BaseController
 {
     @Autowired
