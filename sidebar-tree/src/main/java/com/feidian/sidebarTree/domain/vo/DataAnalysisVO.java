@@ -5,13 +5,12 @@ public class DataAnalysisVO {
     private String traitName;
     private Long traitTypeId;
     private String traitTypeName;
-    private Double value;
+    private Object value;
     private Double average;
     private Double maxNum;
     private Double minNum;
-    private String creatTime;
 
-    public DataAnalysisVO(Long triatId, String traitName, Double value, Double average, Double maxNum, Double minNum) {
+    public DataAnalysisVO(Long triatId, String traitName, Object value, Double average, Double maxNum, Double minNum) {
         this.triatId = triatId;
         this.traitName = traitName;
         this.value = value;
@@ -20,7 +19,7 @@ public class DataAnalysisVO {
         this.minNum = minNum;
     }
 
-    public DataAnalysisVO(Long triatId, String traitName, Long traitTypeId, String traitTypeName, Double value, Double average, Double maxNum, Double minNum, String creatTime) {
+    public DataAnalysisVO(Long triatId, String traitName, Long traitTypeId, String traitTypeName, Object value, Double average, Double maxNum, Double minNum) {
         this.triatId = triatId;
         this.traitName = traitName;
         this.traitTypeId = traitTypeId;
@@ -29,7 +28,6 @@ public class DataAnalysisVO {
         this.average = average;
         this.maxNum = maxNum;
         this.minNum = minNum;
-        this.creatTime = creatTime;
     }
 
 
@@ -44,7 +42,6 @@ public class DataAnalysisVO {
                 ", average=" + average +
                 ", maxNum=" + maxNum +
                 ", minNum=" + minNum +
-                ", creatTime=" + creatTime +
                 '}';
     }
 
@@ -128,7 +125,7 @@ public class DataAnalysisVO {
      * 获取
      * @return value
      */
-    public Double getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -188,19 +185,5 @@ public class DataAnalysisVO {
         this.minNum = minNum;
     }
 
-    /**
-     * 获取
-     * @return creatTime
-     */
-    public String getCreatTime() {
-        return creatTime;
-    }
 
-    /**
-     * 设置
-     * @param creatTime
-     */
-    public void setCreatTime(String creatTime) {
-        this.creatTime = creatTime;
-    }
 }

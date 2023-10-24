@@ -417,8 +417,7 @@ public class TraitServiceImpl implements ITraitService
         //获取所有信息
         List<Map<String, Object>> maps = phenotypeFileMapper.selectAllColumns(tableName);
         //获取我们想要查询的单个的材料的数据
-        HashMap<Double,String> valueAndCreateTimeMap = new HashMap<>();
-        Map<String, AbstractMap.SimpleEntry<Double,String>> wannaMap = new HashMap<>();
+        Map<String, Object> wannaMap = new HashMap<>();
 
         //获取性状
         HashMap<Long, String> traitMap = infoUtil.getTraitsMapReverse();
@@ -436,21 +435,28 @@ public class TraitServiceImpl implements ITraitService
                 String traitValue = traitref.replace("id", "value");
                 System.out.println(traitValue);
                 Object o = map.get(traitValue);
-                if(o==null||StringUtils.equals(o.toString(),"NA")||o.toString().contains("%")) {
+                if(o==null||StringUtils.equals(o.toString(),"NA")) {
                     continue;
                 }
-                Double value = Double.valueOf(o.toString());
-                if(value!=0||value!=null){
-                    List<Double> doubles;
-                    if(datanumber.containsKey(traitName)){
-                        doubles = datanumber.get(traitName);
-                        doubles.add(value);
-                    }
-                    else{
-                        doubles =new ArrayList<>();
-                        doubles.add(value);
-                    }
+                if (o.toString().contains("%")||o.toString().contains("/")){
+                    List<Double> doubles = new ArrayList<>();
+                    doubles.add(0.0);
+                    doubles.add(100.0);
                     datanumber.put(traitName,doubles);
+                }else {
+                    Double value = Double.valueOf(o.toString());
+                    if(value!=0||value!=null){
+                        List<Double> doubles;
+                        if(datanumber.containsKey(traitName)){
+                            doubles = datanumber.get(traitName);
+                            doubles.add(value);
+                        }
+                        else{
+                            doubles =new ArrayList<>();
+                            doubles.add(value);
+                        }
+                        datanumber.put(traitName,doubles);
+                    }
                 }
             }
         }
@@ -472,12 +478,20 @@ public class TraitServiceImpl implements ITraitService
                 String traitValue = traitref.replace("id", "value");
                 System.out.println(traitValue);
                 Object o = map.get(traitValue);
-                if(o==null||StringUtils.equals(o.toString(),"NA")||o.toString().contains("%")) {
+                if(o==null||StringUtils.equals(o.toString(),"NA")) {
                     continue;
                 }
-                Double value = Double.valueOf(o.toString());
-                if(value!=0||value!=null){
-                    wannaMap.put(traitName, new AbstractMap.SimpleEntry<>(value,create_time));
+                else if (o.toString().contains("%") ||o.toString().contains("/")) {
+                    String value = o.toString();
+                    if(!StringUtils.isEmpty(value)){
+                        wannaMap.put(traitName, value);
+                    }
+                }
+                else {
+                    Double value = Double.valueOf(o.toString());
+                    if(value!=0||value!=null){
+                        wannaMap.put(traitName, value);
+                    }
                 }
             }
         }
@@ -495,32 +509,20 @@ public class TraitServiceImpl implements ITraitService
                 traitTypeId = traitTypeMap.get(trait.getTraitId()).getTraitTypeId();
                 traitTypeName = traitTypeMap.get(trait.getTraitId()).getTraitTypeName();
             }
-
-            if(values.size()==0) {
-                DataAnalysisVO dataAnalysisVO = new DataAnalysisVO(
-                        trait.getTraitId(),
-                        trait.getTraitName(),
-                        Double.valueOf(0),
-                        Double.valueOf(0),
-                        Double.valueOf(0));
-            }
-            else{
-                double max = calculateMax(values);
-                double min = calculateMin(values);
-                double average = calculateAverage(values);
+                double max = calculateMax(datanumber.get(trait.getTraitName()));
+                double min = calculateMin(datanumber.get(trait.getTraitName()));
+                double average = calculateAverage(datanumber.get(trait.getTraitName()));
                 DataAnalysisVO dataAnalysisVO =new DataAnalysisVO(
                         trait.getTraitId(),
                         trait.getTraitName(),
                         traitTypeId,
                         traitTypeName,
-                        wannaMap.get(name).getKey(),
-                        max,
-                        min,
+                        wannaMap.get(name),
                         average,
-                        wannaMap.get(name).getValue());
+                        max,
+                        min);
                 res.add(dataAnalysisVO);
             }
-        }
         return res;
     }
 
