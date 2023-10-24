@@ -3,7 +3,6 @@ package com.feidian.sidebarTree.service;
 import com.feidian.sidebarTree.domain.TreePicture;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 【请填写功能名称】Service接口
@@ -63,7 +62,7 @@ public interface ITreePictureService
 
     public List<TreePicture> getTreeByTreeId(int treeId);
 
-    public List<Object> getNodePicCount(Long treeId);
+    public Integer getNodePicCount(Long treeId);
 
 
     String selectPictureUrlById(Integer pictureId);

@@ -1,6 +1,7 @@
 package com.feidian.sidebarTree.controller;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,17 @@ public class TreePictureController extends BaseController
         }
         return AjaxResult.error();
     }
+
+    @GetMapping("/DocumentNum")
+
+    public AjaxResult getDocumentNum(int treeId,String startDate,String endDate) throws ParseException {
+        //TODO 返回map集合
+        return fillService.getDocumentNum(treeId,startDate,endDate);
+
+    }
+
+
+
 
     @PostMapping("/uploadChunk")
     public AjaxResult uploadChunk(@RequestParam("file") MultipartFile chunk,
