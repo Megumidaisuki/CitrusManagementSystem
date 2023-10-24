@@ -20,6 +20,7 @@ import com.feidian.sidebarTree.utils.AsyncUtil;
 import com.feidian.sidebarTree.utils.CsvUtils;
 import com.feidian.sidebarTree.utils.FileUtil;
 import com.feidian.sidebarTree.utils.InfoUtil;
+import io.jsonwebtoken.Header;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.python.antlr.ast.Str;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -293,6 +294,9 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             if (ObjectUtils.isEmpty(id)){
                                 //新增性状
                                 Trait trait = new Trait();
+                                String traitRemark = " ";
+                                /*//如果该性状数据内容为百分比，则在性状名前添加"(_percent)"
+                                if(value.toString().contains("%")) traitRemark = "percent";*/
                                 trait.setTraitName(headers[j + 1]);
                                 trait.setCreateBy(String.valueOf(userId));
                                 traitMapper.insertTrait(trait);
@@ -420,6 +424,9 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                                 Trait trait = new Trait();
                                 trait.setTraitName(headersList.get(i));
                                 trait.setCreateBy(String.valueOf(getUserId()));
+                                /*//如果该性状数据内容为百分比，则在性状名前添加"(_percent)"
+                                String traitRemark ="";
+                                if(value.toString().contains("%")) traitRemark = "percent";*/
                                 traitMapper.insertTrait(trait);
                                 id = traitMapper.selectTraitListWithoutDeleted(trait).get(0).getTraitId();
                                 traitMap.put(trait.getTraitName(),id);

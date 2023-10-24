@@ -65,6 +65,20 @@
         where trait_id = #{traitId}
     </select>
 
+    <resultMap type="TraitTypeVO" id="TraitTypeVOResult">
+        <result property="traitId"    column="trait_id"    />
+        <result property="traitName"    column="trait_name"    />
+        <result property="traitTypeId"    column="trait_type_id"    />
+        <result property="traitTypeName" column="trait_type_name" />
+    </resultMap>
+
+    <select id="selectTraitAndTraitTypeList" parameterType="TraitTypeVO" resultMap="TraitTypeVOResult">
+        SELECT  t.trait_id,t.trait_name,tt.trait_type_id,tt.trait_type_name
+        FROM trait t
+                 JOIN as_trait_type att ON t.trait_id = att.trait_id
+                 JOIN citrus.trait_type tt on att.trait_type_id = tt.trait_type_id
+    </select>
+
     <insert id="insertTrait" parameterType="Trait" useGeneratedKeys="true" keyProperty="traitId">
         insert into trait
         <trim prefix="(" suffix=")" suffixOverrides=",">

@@ -3,10 +3,13 @@ package com.feidian.sidebarTree.domain.vo;
 public class DataAnalysisVO {
     private Long triatId;
     private String traitName;
+    private Long traitTypeId;
+    private String traitTypeName;
     private Double value;
     private Double average;
     private Double maxNum;
     private Double minNum;
+    private String creatTime;
 
     public DataAnalysisVO(Long triatId, String traitName, Double value, Double average, Double maxNum, Double minNum) {
         this.triatId = triatId;
@@ -17,15 +20,31 @@ public class DataAnalysisVO {
         this.minNum = minNum;
     }
 
+    public DataAnalysisVO(Long triatId, String traitName, Long traitTypeId, String traitTypeName, Double value, Double average, Double maxNum, Double minNum, String creatTime) {
+        this.triatId = triatId;
+        this.traitName = traitName;
+        this.traitTypeId = traitTypeId;
+        this.traitTypeName = traitTypeName;
+        this.value = value;
+        this.average = average;
+        this.maxNum = maxNum;
+        this.minNum = minNum;
+        this.creatTime = creatTime;
+    }
+
+
     @Override
     public String toString() {
         return "DataAnalysisVO{" +
                 "triatId=" + triatId +
                 ", traitName='" + traitName + '\'' +
+                ", traitType=" + traitTypeId +
+                ", traitTypeName=" + traitTypeName +
                 ", value=" + value +
                 ", average=" + average +
                 ", maxNum=" + maxNum +
                 ", minNum=" + minNum +
+                ", creatTime=" + creatTime +
                 '}';
     }
 
@@ -40,44 +59,69 @@ public class DataAnalysisVO {
         this.minNum = minNum;
     }
 
+
+    /**
+     * 获取
+     * @return triatId
+     */
     public Long getTriatId() {
         return triatId;
     }
 
+    /**
+     * 设置
+     * @param triatId
+     */
     public void setTriatId(Long triatId) {
         this.triatId = triatId;
     }
 
+    /**
+     * 获取
+     * @return traitName
+     */
     public String getTraitName() {
         return traitName;
     }
 
+    /**
+     * 设置
+     * @param traitName
+     */
     public void setTraitName(String traitName) {
         this.traitName = traitName;
     }
 
-    public Double getAverage() {
-        return average;
+    /**
+     * 获取
+     * @return traitTypeId
+     */
+    public Long getTraitTypeId() {
+        return traitTypeId;
     }
 
-    public void setAverage(Double average) {
-        this.average = average;
+    /**
+     * 设置
+     * @param traitTypeId
+     */
+    public void setTraitTypeId(Long traitTypeId) {
+        this.traitTypeId = traitTypeId;
     }
 
-    public Double getMaxNum() {
-        return maxNum;
+    /**
+     * 获取
+     * @return traitTypeName
+     */
+    public String getTraitTypeName() {
+        return traitTypeName;
     }
 
-    public void setMaxNum(Double maxNum) {
-        this.maxNum = maxNum;
-    }
-
-    public Double getMinNum() {
-        return minNum;
-    }
-
-    public void setMinNum(Double minNum) {
-        this.minNum = minNum;
+    /**
+     * 设置
+     * @param traitTypeName
+     */
+    public void setTraitTypeName(String traitTypeName) {
+        this.traitTypeName = traitTypeName;
     }
 
     /**
@@ -94,5 +138,69 @@ public class DataAnalysisVO {
      */
     public void setValue(Double value) {
         this.value = value;
+    }
+
+    /**
+     * 获取
+     * @return average
+     */
+    public Double getAverage() {
+        return average;
+    }
+
+    /**
+     * 设置
+     * @param average
+     */
+    public void setAverage(Double average) {
+        this.average = average;
+    }
+
+    /**
+     * 获取
+     * @return maxNum
+     */
+    public Double getMaxNum() {
+        return maxNum;
+    }
+
+    /**
+     * 设置
+     * @param maxNum
+     */
+    public void setMaxNum(Double maxNum) {
+        this.maxNum = maxNum;
+    }
+
+    /**
+     * 获取
+     * @return minNum
+     */
+    public Double getMinNum() {
+        return minNum;
+    }
+
+    /**
+     * 设置
+     * @param minNum
+     */
+    public void setMinNum(Double minNum) {
+        this.minNum = minNum;
+    }
+
+    /**
+     * 获取
+     * @return creatTime
+     */
+    public String getCreatTime() {
+        return creatTime;
+    }
+
+    /**
+     * 设置
+     * @param creatTime
+     */
+    public void setCreatTime(String creatTime) {
+        this.creatTime = creatTime;
     }
 }

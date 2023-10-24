@@ -7,6 +7,7 @@ import com.feidian.common.utils.SecurityUtils;
 import com.feidian.common.utils.StringUtils;
 import com.feidian.sidebarTree.domain.*;
 import com.feidian.sidebarTree.domain.vo.DataAnalysisVO;
+import com.feidian.sidebarTree.domain.vo.TraitTypeVO;
 import com.feidian.sidebarTree.domain.vo.TraitVO;
 import com.feidian.sidebarTree.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -416,10 +417,12 @@ public class TraitServiceImpl implements ITraitService
         //获取所有信息
         List<Map<String, Object>> maps = phenotypeFileMapper.selectAllColumns(tableName);
         //获取我们想要查询的单个的材料的数据
-        Map<String,Double> wannaMap = new HashMap<>();
+        HashMap<Double,String> valueAndCreateTimeMap = new HashMap<>();
+        Map<String, AbstractMap.SimpleEntry<Double,String>> wannaMap = new HashMap<>();
 
         //获取性状
         HashMap<Long, String> traitMap = infoUtil.getTraitsMapReverse();
+        HashMap<Long, TraitType> traitTypeMap = infoUtil.getTraitTypeMap();
 
         //遍历每一行
         for (int i = 0; i < maps.size(); i++) {
@@ -457,6 +460,7 @@ public class TraitServiceImpl implements ITraitService
             //从maps中以此获取想要的数据
             Map<String, Object> map = maps.get(i);
             String material_id = map.get("material_id").toString();
+            String create_time = map.get("create_time").toString();
             System.out.println(material_id);
             System.out.println(materialId);
             if(!StringUtils.equals(material_id,materialId)) continue;
@@ -473,7 +477,7 @@ public class TraitServiceImpl implements ITraitService
                 }
                 Double value = Double.valueOf(o.toString());
                 if(value!=0||value!=null){
-                    wannaMap.put(traitName,value);
+                    wannaMap.put(traitName, new AbstractMap.SimpleEntry<>(value,create_time));
                 }
             }
         }
@@ -500,10 +504,13 @@ public class TraitServiceImpl implements ITraitService
                 DataAnalysisVO dataAnalysisVO =new DataAnalysisVO(
                         trait.getTraitId(),
                         trait.getTraitName(),
-                        wannaMap.get(name),
+                        traitTypeMap.get(trait.getTraitId()).getTraitTypeId(),
+                        traitTypeMap.get(trait.getTraitId()).getTraitTypeName(),
+                        wannaMap.get(name).getKey(),
                         max,
                         min,
-                        average);
+                        average,
+                        wannaMap.get(name).getValue());
                 res.add(dataAnalysisVO);
             }
         }
