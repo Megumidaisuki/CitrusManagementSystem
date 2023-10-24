@@ -436,7 +436,7 @@ public class TraitServiceImpl implements ITraitService
                 String traitValue = traitref.replace("id", "value");
                 System.out.println(traitValue);
                 Object o = map.get(traitValue);
-                if(o==null||StringUtils.equals(o.toString(),"NA")) {
+                if(o==null||StringUtils.equals(o.toString(),"NA")||o.toString().contains("%")) {
                     continue;
                 }
                 Double value = Double.valueOf(o.toString());
@@ -472,7 +472,7 @@ public class TraitServiceImpl implements ITraitService
                 String traitValue = traitref.replace("id", "value");
                 System.out.println(traitValue);
                 Object o = map.get(traitValue);
-                if(o==null||StringUtils.equals(o.toString(),"NA")) {
+                if(o==null||StringUtils.equals(o.toString(),"NA")||o.toString().contains("%")) {
                     continue;
                 }
                 Double value = Double.valueOf(o.toString());
@@ -489,6 +489,13 @@ public class TraitServiceImpl implements ITraitService
             Trait query =new Trait();
             query.setTraitName(name);
             Trait trait = traitMapper.selectTraitListWithoutDeleted(query).get(0);
+            Long traitTypeId = null;
+            String traitTypeName = "";
+            if (traitTypeMap.containsKey(trait.getTraitId())){
+                traitTypeId = traitTypeMap.get(trait.getTraitId()).getTraitTypeId();
+                traitTypeName = traitTypeMap.get(trait.getTraitId()).getTraitTypeName();
+            }
+
             if(values.size()==0) {
                 DataAnalysisVO dataAnalysisVO = new DataAnalysisVO(
                         trait.getTraitId(),
@@ -504,8 +511,8 @@ public class TraitServiceImpl implements ITraitService
                 DataAnalysisVO dataAnalysisVO =new DataAnalysisVO(
                         trait.getTraitId(),
                         trait.getTraitName(),
-                        traitTypeMap.get(trait.getTraitId()).getTraitTypeId(),
-                        traitTypeMap.get(trait.getTraitId()).getTraitTypeName(),
+                        traitTypeId,
+                        traitTypeName,
                         wannaMap.get(name).getKey(),
                         max,
                         min,
