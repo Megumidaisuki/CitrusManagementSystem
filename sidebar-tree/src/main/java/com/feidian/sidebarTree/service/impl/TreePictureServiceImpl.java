@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.feidian.common.core.domain.entity.SysRole;
-import com.feidian.common.core.domain.model.LoginUser;
 import com.feidian.sidebarTree.domain.TreePicture;
 import com.feidian.sidebarTree.mapper.TreePictureMapper;
 import com.feidian.sidebarTree.service.FillService;
@@ -120,7 +119,7 @@ public class TreePictureServiceImpl implements ITreePictureService
     }
 
     @Override
-    public List<Object> getNodePicCount(Long treeId) {
+    public Integer getNodePicCount(Long treeId) {
         return treePictureMapper.selectTreePictureCountByTreeId(treeId);
     }
 

@@ -20,6 +20,7 @@ import com.feidian.sidebarTree.utils.AsyncUtil;
 import com.feidian.sidebarTree.utils.CsvUtils;
 import com.feidian.sidebarTree.utils.FileUtil;
 import com.feidian.sidebarTree.utils.InfoUtil;
+import io.jsonwebtoken.Header;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.python.antlr.ast.Str;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -300,6 +301,9 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             if (ObjectUtils.isEmpty(id)){
                                 //新增性状
                                 Trait trait = new Trait();
+                                String traitRemark = " ";
+                                /*//如果该性状数据内容为百分比，则在性状名前添加"(_percent)"
+                                if(value.toString().contains("%")) traitRemark = "percent";*/
                                 trait.setTraitName(headers[j + 1]);
                                 trait.setCreateBy(String.valueOf(userId));
                                 traitMapper.insertTrait(trait);
@@ -397,7 +401,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 //不存在的列在csv表中的列索引
                 ArrayList<Integer> columErrorIndex = new ArrayList<>();
                 boolean newColumn = false;
-                if (columns.size() - 6 != (headersList.size() - 1) * 2){
+                if (columns.size() - 7 != (headersList.size() - 2) * 2){
                     HashMap<String, Long> traitMap = infoUtil.getTraitsMap();
                     long tableTraitColumnCount = (columns.size() - 6L) / 2;
                     //拿到扩列
@@ -427,6 +431,9 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                                 Trait trait = new Trait();
                                 trait.setTraitName(headersList.get(i));
                                 trait.setCreateBy(String.valueOf(getUserId()));
+                                /*//如果该性状数据内容为百分比，则在性状名前添加"(_percent)"
+                                String traitRemark ="";
+                                if(value.toString().contains("%")) traitRemark = "percent";*/
                                 traitMapper.insertTrait(trait);
                                 id = traitMapper.selectTraitListWithoutDeleted(trait).get(0).getTraitId();
                                 traitMap.put(trait.getTraitName(),id);
@@ -476,16 +483,27 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         String[] data = csvReader.getValues();
                         //提起材料名称
                         String materialId = data[0];
-
                         StringBuilder insertDataBuilder = new StringBuilder("(");
-                        for (int index : columnIndex) {
-                            if(traitsMap.get(headers[index]) != null && !headers[index].equals("备注"))
-                                insertDataBuilder.append(StringUtils.isEmpty(headers[index])?"null" : (ObjectUtils.isEmpty(traitsMap.get(headers[index]))?"null" : "'" + traitsMap.get(headers[index]) + "'")).append(",");
-                            else
-                                insertDataBuilder.append(StringUtils.isEmpty(data[index])?"null":"'" + data[index] + "'").append(",");
+                        for (int j = 0; j < 6; j++) {
+                            if(j == 0) insertDataBuilder.append("NULL");
+                            else if(j == 1) insertDataBuilder.append("'" + materialId + "'");
+                            else if(j == 2) insertDataBuilder.append("'" + getLoginUser().getUsername() + "'");
+                            else if(j == 3) insertDataBuilder.append("NOW()");
+                            else if(j == 4) insertDataBuilder.append("'" + getLoginUser().getUsername() + "'");
+                            else if(j == 5) insertDataBuilder.append("NOW()");
+                            insertDataBuilder.append(",");
                         }
-                        //删最后一个逗号
-                        insertDataBuilder.append("'").append(getUserId()).append("',now()");
+                        //拼接性状列
+                        int commaNum = 0;//删最后一个逗号
+                        for (int index : columnIndex) {
+                            commaNum++;
+                            if(index == 0) continue;
+                            if(traitsMap.get(headers[index]) != null && !headers[index].equals("备注")){
+                                insertDataBuilder.append(StringUtils.isEmpty(headers[index])?"null," : (ObjectUtils.isEmpty(traitsMap.get(headers[index]))?"null," : "'" + traitsMap.get(headers[index]) + "',"));
+                                insertDataBuilder.append("'").append(data[index]).append("'");}
+                            else insertDataBuilder.append(StringUtils.isEmpty(data[index])?"null":"'" + data[index] + "'");
+                            if(commaNum < columnIndex.length) insertDataBuilder.append(",");
+                        }
                         insertDataBuilder.append("),");
                         insertSqlBuilder.append(insertDataBuilder);
                         count++;
@@ -518,8 +536,6 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 phenotypeFile.setFileName(fileName);
                 phenotypeFile.setRemark(remark);
                 phenotypeFileMapper.insertPhenotypeFile(phenotypeFile);
-
-
             }catch (ServiceException e) {
                 //异常时改表语句回滚
                 for (String dropColumSql : dropColumParam) {
@@ -532,10 +548,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 }
                 throw e;
             }
-
         }
-
-
         return true;
     }
 

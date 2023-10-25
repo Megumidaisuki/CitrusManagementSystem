@@ -435,7 +435,6 @@ public class FillServiceImpl implements FillService {
 @Transactional
     public AjaxResult mergeChunks(String fileName,int treeId,int isShow) {
         String directoryPath = chunkUploadPath; // 目录路径
-
         String outputFilePath = fileUrl; // 合并后的文件输出路径
         String filePath = getFileUrl(fileName,treeId);
         String fileType = getFileType(filePath);
@@ -484,7 +483,7 @@ public class FillServiceImpl implements FillService {
             String name0 ;
             for (int j = 0; j < Afiles.length; j++) {
                 name0 = Afiles[j].getName();
-                if(name0.substring(0,name0.indexOf("%")).equals(fileName)){
+                if(Afiles[j].getName().substring(0,name0.indexOf("%")).equals(fileName)){
                     files.add(Afiles[j]);
                     temnum++;
                 }
@@ -545,12 +544,75 @@ public class FillServiceImpl implements FillService {
                 }
                 ImageUtil.lessFiles(filePath);
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
         return AjaxResult.success("合并成功");
     }
+
+    @Override
+    public AjaxResult getDocumentNum(int treeId,String startDate,String endDate){
+        String formatStartDate = formatDate(startDate);
+        String formatEndDate = formatDate(endDate);
+        List<SidebarTree> trees = pictureService.selectNodeMessage(treeId);
+        List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
+        Map<String,Map<String,Long>> allList = new HashMap<>();
+        for(SidebarTreeVO sidebarTreeVO:sidebarTreeVOS){
+            Map<String, Long> map = pictureService.selectTreePictureCountByTreeIdAndTime(sidebarTreeVO.getTreeId(), formatStartDate, formatEndDate);
+            allList.put(sidebarTreeVO.getTreeName(),map);
+        }
+        //对集合处理，使前端更好操作
+         Map<String,List<Long>> setList = new HashMap<>();
+        Set<Map.Entry<String, Map<String, Long>>> entries = allList.entrySet();
+        for (Map.Entry<String, Map<String, Long>> entry : entries) {
+            Map<String, Long> value = entry.getValue();
+            List<Long> fileList = getFileList(value, startDate, endDate);
+            setList.put(entry.getKey(),fileList);
+        }
+        return AjaxResult.success(setList);
+    }
+    public static List<Long> getFileList(Map<String, Long> fileCountMap, String startDate, String endDate) {
+        List<Long> fileList = new ArrayList<>();
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar startCalendar = Calendar.getInstance();
+            Calendar endCalendar = Calendar.getInstance();
+
+            startCalendar.setTime(sdf.parse(startDate));
+            endCalendar.setTime(sdf.parse(endDate));
+
+            while (startCalendar.before(endCalendar) || startCalendar.equals(endCalendar)) {
+                String currentDate = sdf.format(startCalendar.getTime());
+
+                if (fileCountMap.containsKey(currentDate)) {
+                    fileList.add(fileCountMap.get(currentDate));
+                } else {
+                    fileList.add(0L);
+                }
+
+                startCalendar.add(Calendar.DATE, 1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fileList;
+    }
+
+    public String formatDate(String date) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date parse = null;
+        try {
+            parse = inputFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return outFormat.format(parse);
+
+    }
+
 }
 

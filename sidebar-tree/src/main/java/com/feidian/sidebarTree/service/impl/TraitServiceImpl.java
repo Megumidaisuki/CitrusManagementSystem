@@ -7,6 +7,7 @@ import com.feidian.common.utils.SecurityUtils;
 import com.feidian.common.utils.StringUtils;
 import com.feidian.sidebarTree.domain.*;
 import com.feidian.sidebarTree.domain.vo.DataAnalysisVO;
+import com.feidian.sidebarTree.domain.vo.TraitTypeVO;
 import com.feidian.sidebarTree.domain.vo.TraitVO;
 import com.feidian.sidebarTree.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -416,10 +417,11 @@ public class TraitServiceImpl implements ITraitService
         //获取所有信息
         List<Map<String, Object>> maps = phenotypeFileMapper.selectAllColumns(tableName);
         //获取我们想要查询的单个的材料的数据
-        Map<String,Double> wannaMap = new HashMap<>();
+        Map<String, Object> wannaMap = new HashMap<>();
 
         //获取性状
         HashMap<Long, String> traitMap = infoUtil.getTraitsMapReverse();
+        HashMap<Long, TraitType> traitTypeMap = infoUtil.getTraitTypeMap();
 
         //遍历每一行
         for (int i = 0; i < maps.size(); i++) {
@@ -436,18 +438,25 @@ public class TraitServiceImpl implements ITraitService
                 if(o==null||StringUtils.equals(o.toString(),"NA")) {
                     continue;
                 }
-                Double value = Double.valueOf(o.toString());
-                if(value!=0||value!=null){
-                    List<Double> doubles;
-                    if(datanumber.containsKey(traitName)){
-                        doubles = datanumber.get(traitName);
-                        doubles.add(value);
-                    }
-                    else{
-                        doubles =new ArrayList<>();
-                        doubles.add(value);
-                    }
+                if (o.toString().contains("%")||o.toString().contains("/")){
+                    List<Double> doubles = new ArrayList<>();
+                    doubles.add(0.0);
+                    doubles.add(100.0);
                     datanumber.put(traitName,doubles);
+                }else {
+                    Double value = Double.valueOf(o.toString());
+                    if(value!=0||value!=null){
+                        List<Double> doubles;
+                        if(datanumber.containsKey(traitName)){
+                            doubles = datanumber.get(traitName);
+                            doubles.add(value);
+                        }
+                        else{
+                            doubles =new ArrayList<>();
+                            doubles.add(value);
+                        }
+                        datanumber.put(traitName,doubles);
+                    }
                 }
             }
         }
@@ -457,6 +466,7 @@ public class TraitServiceImpl implements ITraitService
             //从maps中以此获取想要的数据
             Map<String, Object> map = maps.get(i);
             String material_id = map.get("material_id").toString();
+            String create_time = map.get("create_time").toString();
             System.out.println(material_id);
             System.out.println(materialId);
             if(!StringUtils.equals(material_id,materialId)) continue;
@@ -471,9 +481,17 @@ public class TraitServiceImpl implements ITraitService
                 if(o==null||StringUtils.equals(o.toString(),"NA")) {
                     continue;
                 }
-                Double value = Double.valueOf(o.toString());
-                if(value!=0||value!=null){
-                    wannaMap.put(traitName,value);
+                else if (o.toString().contains("%") ||o.toString().contains("/")) {
+                    String value = o.toString();
+                    if(!StringUtils.isEmpty(value)){
+                        wannaMap.put(traitName, value);
+                    }
+                }
+                else {
+                    Double value = Double.valueOf(o.toString());
+                    if(value!=0||value!=null){
+                        wannaMap.put(traitName, value);
+                    }
                 }
             }
         }
@@ -485,28 +503,26 @@ public class TraitServiceImpl implements ITraitService
             Trait query =new Trait();
             query.setTraitName(name);
             Trait trait = traitMapper.selectTraitListWithoutDeleted(query).get(0);
-            if(values.size()==0) {
-                DataAnalysisVO dataAnalysisVO = new DataAnalysisVO(
-                        trait.getTraitId(),
-                        trait.getTraitName(),
-                        Double.valueOf(0),
-                        Double.valueOf(0),
-                        Double.valueOf(0));
+            Long traitTypeId = null;
+            String traitTypeName = "";
+            if (traitTypeMap.containsKey(trait.getTraitId())){
+                traitTypeId = traitTypeMap.get(trait.getTraitId()).getTraitTypeId();
+                traitTypeName = traitTypeMap.get(trait.getTraitId()).getTraitTypeName();
             }
-            else{
-                double max = calculateMax(values);
-                double min = calculateMin(values);
-                double average = calculateAverage(values);
+                double max = calculateMax(datanumber.get(trait.getTraitName()));
+                double min = calculateMin(datanumber.get(trait.getTraitName()));
+                double average = calculateAverage(datanumber.get(trait.getTraitName()));
                 DataAnalysisVO dataAnalysisVO =new DataAnalysisVO(
                         trait.getTraitId(),
                         trait.getTraitName(),
+                        traitTypeId,
+                        traitTypeName,
                         wannaMap.get(name),
+                        average,
                         max,
-                        min,
-                        average);
+                        min);
                 res.add(dataAnalysisVO);
             }
-        }
         return res;
     }
 

@@ -25,6 +25,14 @@ public class TraitType extends BaseEntity {
     @Excel(name = "性状类型名称", sort = 1)
     private String traitTypeName;
 
+    public TraitType() {
+    }
+
+    public TraitType(Long traitTypeId, String traitTypeName) {
+        this.traitTypeId = traitTypeId;
+        this.traitTypeName = traitTypeName;
+    }
+
     public void setTraitTypeId(Long traitTypeId) {
         this.traitTypeId = traitTypeId;
     }
@@ -46,11 +54,6 @@ public class TraitType extends BaseEntity {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("traitTypeId", getTraitTypeId())
                 .append("traitTypeName", getTraitTypeName())
-                .append("createBy", getCreateBy())
-                .append("createTime", getCreateTime())
-                .append("updateBy", getUpdateBy())
-                .append("updateTime", getUpdateTime())
-                .append("remark", getRemark())
                 .toString();
     }
 }

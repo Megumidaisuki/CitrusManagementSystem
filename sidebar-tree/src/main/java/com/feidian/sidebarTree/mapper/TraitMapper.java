@@ -2,6 +2,8 @@ package com.feidian.sidebarTree.mapper;
 
 import java.util.List;
 import com.feidian.sidebarTree.domain.Trait;
+import com.feidian.sidebarTree.domain.vo.DataAnalysisVO;
+import com.feidian.sidebarTree.domain.vo.TraitTypeVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -71,4 +73,7 @@ public interface TraitMapper
 
     //1.6
     public Integer checkTraitName(@Param("trait_name") String trait_name);
+
+    //查询性状Id、性状名称、性状类型id、性状类型名称
+    List<TraitTypeVO> selectTraitAndTraitTypeList();
 }
