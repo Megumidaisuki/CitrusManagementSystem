@@ -18,6 +18,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="treeName" column="tree_name"/>
         <result property="treeId" column="tree_id"/>
     </resultMap>
+    <resultMap id="SiderTreeMapTWO" type="java.util.Map">
+        <result property="createTime" column="create_time"/>
+    </resultMap>
 
     <sql id="selectTreePictureVo">
         select picture_id, picture_url, tree_id, is_show,shot_time,less_picture_url,create_time,update_time from tree_picture
@@ -51,10 +54,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectPictureUrlById" resultType="java.lang.String">
         select picture_url from tree_picture where picture_id = #{pictureId}
     </select>
-    <select id="selectNodeMessage" resultType="com.feidian.sidebarTree.domain.SidebarTree">
+    <select id="selectNodeMessage" resultMap = "SidebarTreeMap">
         select tree_name,tree_id from sidebar_tree where parent_id = #{treeId}
     </select>
-    <select id="selectTreePictureCountByTreeIdAndTime" resultType="java.util.Map">
+    <select id="selectTreePictureCountByTreeIdAndTime" resultType="java.util.Map" >
         select DATE(create_time),count(*)
         from citrus.phenotype_file
         where tree_id = #{treeId}

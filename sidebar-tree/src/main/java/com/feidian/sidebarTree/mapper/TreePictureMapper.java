@@ -75,5 +75,5 @@ public interface TreePictureMapper
 
     List<SidebarTree> selectNodeMessage(int treeId);
 
-    Map<String,Long> selectTreePictureCountByTreeIdAndTime(Long treeId, String startDate, String endDate);
+    Map<String,Long> selectTreePictureCountByTreeIdAndTime(@Param("treeId") Long treeId, @Param("startDate") String startDate,@Param("endDate") String endDate);
 }
