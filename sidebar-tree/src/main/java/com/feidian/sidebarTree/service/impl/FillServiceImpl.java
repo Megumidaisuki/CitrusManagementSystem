@@ -435,33 +435,39 @@ public class FillServiceImpl implements FillService {
 @Transactional
     public AjaxResult mergeChunks(String fileName,int treeId,int isShow) {
         String directoryPath = chunkUploadPath; // 目录路径
+
         String outputFilePath = fileUrl; // 合并后的文件输出路径
         String filePath = getFileUrl(fileName,treeId);
-
-        //TODO 实现对文件进行处理，上传到数据库
-        TreePicture treePicture = new TreePicture();
         String fileType = getFileType(filePath);
-        if(!"png".equals(fileType)){
-            String PngFilePath = filePath.substring(0, filePath.lastIndexOf(".")+1)+"png";//转换为png格式便于后续Python操作
-            System.out.println(filePath+"*");
-            ImageUtil.JPEGtoPNGConverter(filePath,PngFilePath);
-            filePath=PngFilePath;
+        if(!(fileType.equals("xlsx") || fileType.equals("csv"))) {
+            //TODO 实现对文件进行处理，上传到数据库
+            TreePicture treePicture = new TreePicture();
+
+            if (!"png".equals(fileType)) {
+                String PngFilePath = filePath.substring(0, filePath.lastIndexOf(".") + 1) + "png";//转换为png格式便于后续Python操作
+                System.out.println(filePath + "*");
+                ImageUtil.JPEGtoPNGConverter(filePath, PngFilePath);
+                filePath = PngFilePath;
+            }
+            treePicture.setPictureUrl(filePath);
+            treePicture.setIsShow(isShow);
+            treePicture.setTreeId((long) treeId);
+            //创建略缩图
+            String pictureUrl = treePicture.getPictureUrl();
+            File file2 = new File(pictureUrl);
+            StringBuffer absoluteFile = new StringBuffer(file2.getAbsoluteFile().getName());
+            int i = absoluteFile.lastIndexOf(".");
+            String lesspic = new String(file2.getParent() + "\\" + absoluteFile.insert(i, 2).toString());
+            treePicture.setLessPictureUrl(lesspic);
+
+            try {
+                treePicture.setCreateBy(getUserId().toString());
+            } catch (Exception e) {
+            }
+            pictureService.insertTreePicture(treePicture);
+
+
         }
-        treePicture.setPictureUrl(filePath);
-        treePicture.setIsShow(isShow);
-        treePicture.setTreeId((long)treeId);
-        //创建略缩图
-        String pictureUrl = treePicture.getPictureUrl();
-        File file2 =new File(pictureUrl);
-        StringBuffer absoluteFile =new StringBuffer(file2.getAbsoluteFile().getName());
-        int i = absoluteFile.lastIndexOf(".");
-        String lesspic =new String(file2.getParent()+"\\"+absoluteFile.insert(i,2).toString());
-        treePicture.setLessPictureUrl(lesspic);
-
-        try{
-            treePicture.setCreateBy(getUserId().toString());}catch (Exception e ){}
-        pictureService.insertTreePicture(treePicture);
-
         //分块文件合并
 
         try {
@@ -478,7 +484,7 @@ public class FillServiceImpl implements FillService {
             String name0 ;
             for (int j = 0; j < Afiles.length; j++) {
                 name0 = Afiles[j].getName();
-                if(Afiles[j].getName().substring(0,name0.indexOf("%")).equals(fileName)){
+                if(name0.substring(0,name0.indexOf("%")).equals(fileName)){
                     files.add(Afiles[j]);
                     temnum++;
                 }
@@ -531,17 +537,19 @@ public class FillServiceImpl implements FillService {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        File loadFile = new File(filePath);
-        try {
-            if (!loadFile.getParentFile().exists()){
-                loadFile.getParentFile().mkdirs();
+        if(fileName.substring(fileName.lastIndexOf(".") + 1,fileName.length()).equals("png")) {
+            File loadFile = new File(filePath);
+            try {
+                if (!loadFile.getParentFile().exists()) {
+                    loadFile.getParentFile().mkdirs();
+                }
+                ImageUtil.lessFiles(filePath);
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            ImageUtil.lessFiles(pictureUrl);
 
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
         return AjaxResult.success("合并成功");
     }
 }
