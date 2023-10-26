@@ -6,15 +6,11 @@ public class DataAnalysisVO {
     private Long traitTypeId;
     private String traitTypeName;
     private Object value;
-    private Double average;
-    private Double maxNum;
-    private Double minNum;
+    private Object average;
+    private Object maxNum;
+    private Object minNum;
 
-    private String averageDate;
-    private String maxNumDate;
-    private String minNumDate;
-
-    public DataAnalysisVO(Long triatId, String traitName, Object value, Double average, Double maxNum, Double minNum) {
+    public DataAnalysisVO(Long triatId, String traitName, Object value, Object average, Object maxNum, Object minNum) {
         this.triatId = triatId;
         this.traitName = traitName;
         this.value = value;
@@ -23,7 +19,7 @@ public class DataAnalysisVO {
         this.minNum = minNum;
     }
 
-    public DataAnalysisVO(Long triatId, String traitName, Long traitTypeId, String traitTypeName, Object value, Double average, Double maxNum, Double minNum) {
+    public DataAnalysisVO(Long triatId, String traitName, Long traitTypeId, String traitTypeName, Object value, Object average, Object maxNum, Object minNum) {
         this.triatId = triatId;
         this.traitName = traitName;
         this.traitTypeId = traitTypeId;
@@ -34,16 +30,6 @@ public class DataAnalysisVO {
         this.minNum = minNum;
     }
 
-    public DataAnalysisVO(Long triatId, String traitName, Long traitTypeId, String traitTypeName, Object value, String averageDate, String maxNumDate, String minNumDate) {
-        this.triatId = triatId;
-        this.traitName = traitName;
-        this.traitTypeId = traitTypeId;
-        this.traitTypeName = traitTypeName;
-        this.value = value;
-        this.averageDate = averageDate;
-        this.maxNumDate = maxNumDate;
-        this.minNumDate = minNumDate;
-    }
 
 
     @Override
@@ -63,7 +49,7 @@ public class DataAnalysisVO {
     public DataAnalysisVO() {
     }
 
-    public DataAnalysisVO(Long triatId, String traitName,Double maxNum, Double minNum, Double average) {
+    public DataAnalysisVO(Long triatId, String traitName,Object maxNum, Object minNum, Object average) {
         this.triatId = triatId;
         this.traitName = traitName;
         this.average = average;
@@ -148,15 +134,16 @@ public class DataAnalysisVO {
      * 设置
      * @param value
      */
-    public void setValue(Double value) {
+    public void setValue(Object value) {
         this.value = value;
     }
+
 
     /**
      * 获取
      * @return average
      */
-    public Double getAverage() {
+    public Object getAverage() {
         return average;
     }
 
@@ -164,7 +151,7 @@ public class DataAnalysisVO {
      * 设置
      * @param average
      */
-    public void setAverage(Double average) {
+    public void setAverage(Object average) {
         this.average = average;
     }
 
@@ -172,7 +159,7 @@ public class DataAnalysisVO {
      * 获取
      * @return maxNum
      */
-    public Double getMaxNum() {
+    public Object getMaxNum() {
         return maxNum;
     }
 
@@ -180,7 +167,7 @@ public class DataAnalysisVO {
      * 设置
      * @param maxNum
      */
-    public void setMaxNum(Double maxNum) {
+    public void setMaxNum(Object maxNum) {
         this.maxNum = maxNum;
     }
 
@@ -188,7 +175,7 @@ public class DataAnalysisVO {
      * 获取
      * @return minNum
      */
-    public Double getMinNum() {
+    public Object getMinNum() {
         return minNum;
     }
 
@@ -196,56 +183,7 @@ public class DataAnalysisVO {
      * 设置
      * @param minNum
      */
-    public void setMinNum(Double minNum) {
+    public void setMinNum(Object minNum) {
         this.minNum = minNum;
-    }
-
-
-    /**
-     * 获取
-     * @return averageDate
-     */
-    public String getAverageDate() {
-        return averageDate;
-    }
-
-    /**
-     * 设置
-     * @param averageDate
-     */
-    public void setAverageDate(String averageDate) {
-        this.averageDate = averageDate;
-    }
-
-    /**
-     * 获取
-     * @return maxNumDate
-     */
-    public String getMaxNumDate() {
-        return maxNumDate;
-    }
-
-    /**
-     * 设置
-     * @param maxNumDate
-     */
-    public void setMaxNumDate(String maxNumDate) {
-        this.maxNumDate = maxNumDate;
-    }
-
-    /**
-     * 获取
-     * @return minNumDate
-     */
-    public String getMinNumDate() {
-        return minNumDate;
-    }
-
-    /**
-     * 设置
-     * @param minNumDate
-     */
-    public void setMinNumDate(String minNumDate) {
-        this.minNumDate = minNumDate;
     }
 }

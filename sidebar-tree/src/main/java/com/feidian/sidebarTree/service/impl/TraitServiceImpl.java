@@ -425,10 +425,12 @@ public class TraitServiceImpl implements ITraitService
         HashMap<Long, String> traitMap = infoUtil.getTraitsMapReverse();
         HashMap<Long, TraitType> traitTypeMap = infoUtil.getTraitTypeMap();
 
-        //遍历每一行
+        //遍历每一行 获取全部数据
         //日期单独处理
         List<String> dateData = new ArrayList<>();
         String dateName = "";
+        //百分比单独处理
+        List<Double> percentList = new ArrayList<>();
         for (int i = 0; i < maps.size(); i++) {
             //从maps中以此获取想要的数据
             Map<String, Object> map = maps.get(i);
@@ -452,9 +454,8 @@ public class TraitServiceImpl implements ITraitService
                     } catch (NumberFormatException e) {
                         System.err.println("百分数转换小数失败");
                     }
-                    List<Double> doubles = new ArrayList<>();
-                    doubles.add(percent);
-                    datanumber.put(traitName,doubles);
+                    percentList.add(percent);
+                    datanumber.put(traitName,percentList);
                 } else if (o.toString().contains("/")) {
                     List<Double> doubles = new ArrayList<>();
                     dateName = traitName;
@@ -478,7 +479,7 @@ public class TraitServiceImpl implements ITraitService
             }
         }
 
-        //遍历每一行
+        //遍历每一行 获取查询的材料的数据
         for (int i = 0; i < maps.size(); i++) {
             //从maps中以此获取想要的数据
             Map<String, Object> map = maps.get(i);
@@ -526,6 +527,10 @@ public class TraitServiceImpl implements ITraitService
                 traitTypeId = traitTypeMap.get(trait.getTraitId()).getTraitTypeId();
                 traitTypeName = traitTypeMap.get(trait.getTraitId()).getTraitTypeName();
             }
+
+            //即将返回的数据内容
+            DataAnalysisVO dataAnalysisVO =new DataAnalysisVO();
+
             if(dateName.equals(name)){
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
                 long[] timestamps = new long[dateData.size()];
@@ -562,31 +567,31 @@ public class TraitServiceImpl implements ITraitService
                 String maxDate = dateFormat.format(new Date(maxTimestamp));
                 String avgDate = dateFormat.format(new Date(average));
 
-                DataAnalysisVO dataAnalysisVO =new DataAnalysisVO(
-                        trait.getTraitId(),
-                        trait.getTraitName(),
-                        traitTypeId,
-                        traitTypeName,
-                        wannaMap.get(name),
-                        avgDate,
-                        maxDate,
-                        minDate);
+                dataAnalysisVO.setTriatId(trait.getTraitId());
+                dataAnalysisVO.setTraitName(trait.getTraitName());
+                dataAnalysisVO.setTraitTypeId(traitTypeId);
+                dataAnalysisVO.setTraitTypeName(traitTypeName);
+                dataAnalysisVO.setValue(wannaMap.get(name));
+                dataAnalysisVO.setAverage(avgDate);
+                dataAnalysisVO.setMaxNum(maxDate);
+                dataAnalysisVO.setMinNum(minDate);
                 res.add(dataAnalysisVO);
-            }
+            }else {
                 double max = calculateMax(datanumber.get(trait.getTraitName()));
                 double min = calculateMin(datanumber.get(trait.getTraitName()));
                 double average = calculateAverage(datanumber.get(trait.getTraitName()));
-                DataAnalysisVO dataAnalysisVO =new DataAnalysisVO(
-                        trait.getTraitId(),
-                        trait.getTraitName(),
-                        traitTypeId,
-                        traitTypeName,
-                        wannaMap.get(name),
-                        average,
-                        max,
-                        min);
+
+                dataAnalysisVO.setTriatId(trait.getTraitId());
+                dataAnalysisVO.setTraitName(trait.getTraitName());
+                dataAnalysisVO.setTraitTypeId(traitTypeId);
+                dataAnalysisVO.setTraitTypeName(traitTypeName);
+                dataAnalysisVO.setValue(wannaMap.get(name));
+                dataAnalysisVO.setAverage(average);
+                dataAnalysisVO.setMaxNum(max);
+                dataAnalysisVO.setMinNum(min);
                 res.add(dataAnalysisVO);
             }
+        }
         return res;
     }
 
