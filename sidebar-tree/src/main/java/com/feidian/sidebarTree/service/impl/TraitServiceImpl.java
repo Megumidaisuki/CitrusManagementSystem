@@ -1,5 +1,7 @@
 package com.feidian.sidebarTree.service.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.feidian.common.utils.DateUtils;
@@ -424,6 +426,9 @@ public class TraitServiceImpl implements ITraitService
         HashMap<Long, TraitType> traitTypeMap = infoUtil.getTraitTypeMap();
 
         //遍历每一行
+        //日期单独处理
+        List<String> dateData = new ArrayList<>();
+        String dateName = "";
         for (int i = 0; i < maps.size(); i++) {
             //从maps中以此获取想要的数据
             Map<String, Object> map = maps.get(i);
@@ -438,12 +443,24 @@ public class TraitServiceImpl implements ITraitService
                 if(o==null||StringUtils.equals(o.toString(),"NA")) {
                     continue;
                 }
-                if (o.toString().contains("%")||o.toString().contains("/")){
+                if (o.toString().contains("%")){
+                    StringBuilder sb = new StringBuilder(o.toString());
+                    sb.deleteCharAt(sb.length() - 1);
+                    Double percent = null;
+                    try {
+                        percent = Double.parseDouble(sb.toString());
+                    } catch (NumberFormatException e) {
+                        System.err.println("百分数转换小数失败");
+                    }
                     List<Double> doubles = new ArrayList<>();
-                    doubles.add(0.0);
-                    doubles.add(100.0);
+                    doubles.add(percent);
                     datanumber.put(traitName,doubles);
-                }else {
+                } else if (o.toString().contains("/")) {
+                    List<Double> doubles = new ArrayList<>();
+                    dateName = traitName;
+                    dateData.add(o.toString());
+                    datanumber.put(traitName,doubles);
+                } else {
                     Double value = Double.valueOf(o.toString());
                     if(value!=0||value!=null){
                         List<Double> doubles;
@@ -508,6 +525,53 @@ public class TraitServiceImpl implements ITraitService
             if (traitTypeMap.containsKey(trait.getTraitId())){
                 traitTypeId = traitTypeMap.get(trait.getTraitId()).getTraitTypeId();
                 traitTypeName = traitTypeMap.get(trait.getTraitId()).getTraitTypeName();
+            }
+            if(dateName.equals(name)){
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                long[] timestamps = new long[dateData.size()];
+
+                // Convert date strings to timestamps and calculate the sum
+                long sum = 0;
+                long minTimestamp = Long.MAX_VALUE;
+                long maxTimestamp = Long.MIN_VALUE;
+
+                for (int i = 0; i < dateData.size(); i++) {
+                    try {
+                        Date date = dateFormat.parse(dateData.get(i));
+                        long timestamp = date.getTime();
+                        timestamps[i] = timestamp;
+                        sum += timestamp;
+
+                        if (timestamp < minTimestamp) {
+                            minTimestamp = timestamp;
+                        }
+
+                        if (timestamp > maxTimestamp) {
+                            maxTimestamp = timestamp;
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // Calculate the average
+                long average = sum / dateData.size();
+
+                // Convert timestamps back to date format and output
+                String minDate = dateFormat.format(new Date(minTimestamp));
+                String maxDate = dateFormat.format(new Date(maxTimestamp));
+                String avgDate = dateFormat.format(new Date(average));
+
+                DataAnalysisVO dataAnalysisVO =new DataAnalysisVO(
+                        trait.getTraitId(),
+                        trait.getTraitName(),
+                        traitTypeId,
+                        traitTypeName,
+                        wannaMap.get(name),
+                        avgDate,
+                        maxDate,
+                        minDate);
+                res.add(dataAnalysisVO);
             }
                 double max = calculateMax(datanumber.get(trait.getTraitName()));
                 double min = calculateMin(datanumber.get(trait.getTraitName()));
