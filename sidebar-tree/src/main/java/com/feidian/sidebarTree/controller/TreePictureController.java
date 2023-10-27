@@ -92,7 +92,7 @@ public class TreePictureController extends BaseController
     }
 
     @GetMapping("/DocumentNum")
-    public AjaxResult getDocumentNum(int treeId,String startDate,String endDate)  {
+    public AjaxResult getDocumentNum(int treeId,int startDate,int endDate)  {
         //TODO 返回map集合
         return fillService.getDocumentNum(treeId,startDate,endDate);
 

@@ -341,6 +341,180 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
             } else return null;
         } else return null;
     }
+    @Transactional
+    @Override
+    public String uploadFile(Long treeId, MultipartFile file, int fileStatus, String remark, String fileName,int pointStatus,String filePath) throws ServiceException, IOException {
+        Long userId = getUserId();
+        if (file!=null){
+            //获取原文件名
+            String filename = file.getOriginalFilename();
+            if (filename !=null){
+                //获取文件地址
+//                String filePath = fileUtil.getFileUrl(filename,treeId);
+                //xlsx转csv
+                //获取后缀名
+                String suffixName = filename.substring(filename.lastIndexOf("."));
+                if (suffixName.equals(".xlsx")) {
+                    if(pointStatus == 1) {
+                        FileUtil.save(file, filePath);
+                    }
+                    String newFilePath = filePath.substring(0,filePath.length() - 5) + ".csv";
+                    CsvUtils.xlsx2Csv(filePath,newFilePath);
+                    File delFile = new File(filePath);
+                    if(delFile.exists()){
+                        delFile.delete();
+                    }
+                    filePath = newFilePath;
+                    filename = filename.substring(0,filename.length() - 5) + ".csv";
+                }else if(!suffixName.equals(".csv")){
+                    throw new ServiceException("文件格式错误");
+                }else{
+                    //1.保存文件
+                    boolean save;
+                    if(pointStatus == 1) {
+                        save = FileUtil.save(file, filePath);
+                    }else{
+                        save = true;
+                    }
+                    if (!save) throw new ServiceException("文件保存失败");
+                }
+                PhenotypeFile phenotypeFile = new PhenotypeFile();
+                phenotypeFile.setFileName(fileName);
+                phenotypeFile.setTableName("phenotype_" + fileName + "_" + RandomStringUtils.randomNumeric(6));
+                phenotypeFile.setUrl(filePath);
+                phenotypeFile.setRemark(remark);
+                phenotypeFile.setStatus(fileStatus);
+                phenotypeFile.setTreeId(treeId);
+                phenotypeFile.setCreateBy(getUserId().toString());
+
+                //2.表内数据入库
+                CsvReader csvReader = null;
+                String[] headers;
+                String[] r1;
+                try{
+                    csvReader = new CsvReader(filePath,',', Charset.forName("GBK"));
+                    if (csvReader.readRecord()) {
+                        headers = csvReader.getRawRecord().split(",");
+                    }
+                    else throw new ServiceException("缺少表头信息");
+                    /*//首行数据，拿到物种id，群体id，年份，位置,设置给表型文件
+                    if (csvReader.readRecord()) {
+                        r1 = csvReader.getRawRecord().split(",");
+                    }
+                    else throw new ServiceException("无数据");*/
+                    //获取性状
+                    HashMap<String, Long> traitMap = infoUtil.getTraitsMap();
+
+                    //建表
+                    // 创建表的SQL语句
+                    StringBuilder createSQLBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS " + phenotypeFile.getTableName() + " (" +
+                            "phenotype_id bigint(20) AUTO_INCREMENT COMMENT '自增主键' PRIMARY KEY," +
+                            "material_id varchar(64) COMMENT '材料名称'," +
+                            "create_by varchar(64) COMMENT '创建者'," +
+                            "create_time datetime COMMENT '创建者时间'," +
+                            "update_by varchar(64) COMMENT '更新者'," +
+                            "update_time datetime COMMENT '更新时间'," +
+                            "remark varchar(64) COMMENT '备注'"
+                    );
+                    // 添加性状列定义
+                    // 截取性状部分列 命名从0开始
+                    StringBuilder traitParam = new StringBuilder();
+                    int traitId = 0;
+                    for (int i = 1 ; i < headers.length - 1; i++) {
+                        traitParam.append(", trait_id_").append(traitId).append(" bigint(20), "); // 性状ID
+                        traitParam.append("trait_value_").append(traitId++).append(" varchar(100)");   // 性状值
+                    }
+                    createSQLBuilder.append(traitParam);
+                    // 添加表定义结尾
+                    createSQLBuilder.append(")COMMENT 'phenotype_文件名_六位数字串';");
+                    String createSql = createSQLBuilder.toString();
+                    // 执行建表语句
+                    excuteMapper.excute(createSql);
+
+                    //数据入库
+                    //拼接表头
+                    List<String[]> data = CsvUtils.read(filePath);
+                    StringBuilder insertSQLBuilder = new StringBuilder("INSERT INTO " + phenotypeFile.getTableName() +
+                            "(phenotype_id,material_id,create_by,create_time,update_by,update_time,remark");
+                    traitId = 0;
+                    traitParam = new StringBuilder();
+                    for (int i = 1 ; i < headers.length - 1; i++) {
+                        traitParam.append(", trait_id_").append(traitId); // 性状ID
+                        traitParam.append(", trait_value_").append(traitId++);   // 性状值
+                    }
+                    insertSQLBuilder.append(traitParam);
+                    insertSQLBuilder.append(") values");
+                    //拼接固定列
+                    for (int i = 1; i < data.size(); i++) {
+                        //设置材料名称
+                        String materialId = data.get(i)[0];
+
+                        insertSQLBuilder.append("(");
+                        for (int j = 0; j < 6; j++) {
+                            if(j >= data.get(i).length || StringUtils.isEmpty(data.get(i)[j])) insertSQLBuilder.append("null");
+                            else if(j == 0) insertSQLBuilder.append("NULL");
+                            else if(j == 1) insertSQLBuilder.append("'" + materialId + "'");
+                            else if(j == 2) insertSQLBuilder.append("'" + getLoginUser().getUsername() + "'");
+                            else if(j == 3) insertSQLBuilder.append("NOW()");
+                            else if(j == 4) insertSQLBuilder.append("'" + getLoginUser().getUsername() + "'");
+                            else if(j == 5) insertSQLBuilder.append("NOW()");
+                            insertSQLBuilder.append(",");
+                        }
+                        //拼接固定列 remark
+                        if (traitId + 6 < data.get(i).length) {
+                            insertSQLBuilder.append("'").append(data.get(i)[traitId + 1]).append("'");
+                        } else {
+                            insertSQLBuilder.append("null,");
+                        }
+                        //拼接性状列
+                        for (int j = 0; j < traitId ; j++) {
+                            Long id = traitMap.get(headers[j + 1]);
+                            String value = null;
+                            value = data.get(i)[j + 1];
+                            //如果性状id不在性状表中，则新增性状
+                            if (ObjectUtils.isEmpty(id)){
+                                //新增性状
+                                Trait trait = new Trait();
+                                String traitRemark = " ";
+                                /*//如果该性状数据内容为百分比，则在性状名前添加"(_percent)"
+                                if(value.toString().contains("%")) traitRemark = "percent";*/
+                                trait.setTraitName(headers[j + 1]);
+                                trait.setCreateBy(String.valueOf(userId));
+                                traitMapper.insertTrait(trait);
+                                id = traitMapper.selectTraitListWithoutDeleted(trait).get(0).getTraitId();
+                                traitMap.put(trait.getTraitName(),id);
+                            }
+                            if(ObjectUtils.isEmpty(id))
+                                insertSQLBuilder.append("null,");
+                            else
+                                insertSQLBuilder.append("'").append(id).append("'").append(",");
+                            if(StringUtils.isEmpty(value))
+                                insertSQLBuilder.append("null,");
+                            else
+                                insertSQLBuilder.append("'").append(value).append("'");
+                            if(j < traitId - 1) insertSQLBuilder.append(",");
+                        }
+
+                        insertSQLBuilder.append(")");
+                        if(i != data.size() - 1) insertSQLBuilder.append(",");
+                    }
+                    insertSQLBuilder.append(";");
+                    String insertSql = insertSQLBuilder.toString();
+                    excuteMapper.excute(insertSql);
+                }catch (Exception e){
+                    excuteMapper.excute("drop table if exists " + phenotypeFile.getTableName());
+                    throw e;
+                }finally {
+                    if (csvReader != null) {
+                        csvReader.close();
+                    }
+                }
+                //3.存文件表数据
+                phenotypeFileMapper.insertPhenotypeFile(phenotypeFile);
+                return phenotypeFile.getTableName();
+            } else return null;
+        } else return null;
+    }
 
 
     /**

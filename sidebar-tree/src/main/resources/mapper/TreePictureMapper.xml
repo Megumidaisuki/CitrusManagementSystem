@@ -49,7 +49,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectTreePictureCountByTreeId" resultType="java.lang.Integer">
-        select count(*) from tree_picture where (tree_id in (select tree_id from sidebar_tree where parent_id = #{treeId})) or tree_id = #{treeId}
+        select count(*) from tree_picture tp where (tree_id in (select tree_id from sidebar_tree where parent_id = #{treeId})) or tree_id = #{treeId}
     </select>
     <select id="selectPictureUrlById" resultType="java.lang.String">
         select picture_url from tree_picture where picture_id = #{pictureId}

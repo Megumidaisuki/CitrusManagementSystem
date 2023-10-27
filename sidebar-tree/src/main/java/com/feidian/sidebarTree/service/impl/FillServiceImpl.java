@@ -549,12 +549,12 @@ public class FillServiceImpl implements FillService {
 
 
     }
-    return AjaxResult.success("合并成功");
+    return AjaxResult.success("合并成功",filePath);
 }
     @Override
-    public AjaxResult getDocumentNum( int treeId, String startDate, String endDate){
-        String formatStartDate = formatDate(startDate);
-        String formatEndDate = formatDate(endDate);
+    public AjaxResult getDocumentNum(int treeId, int startDate, int endDate){
+        String formatStartDate = formatDate(String.valueOf(startDate));
+        String formatEndDate = formatDate(String.valueOf(endDate));
         List<SidebarTree> trees = pictureService.selectNodeMessage(treeId);
         List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
         Map<String, Map<String, Long>> allList = new HashMap<>();
@@ -573,7 +573,7 @@ public class FillServiceImpl implements FillService {
         Set<Map.Entry<String, Map<String, Long>>> entries = allList.entrySet();
         for (Map.Entry<String, Map<String, Long>> entry : entries) {
             Map<String, Long> value = entry.getValue();
-            List<Long> fileList = getFileList(value, formatDate(startDate), formatDate(endDate));
+            List<Long> fileList = getFileList(value, formatStartDate, formatEndDate);
             setList.put(entry.getKey(), fileList);
         }
         return AjaxResult.success(setList);
