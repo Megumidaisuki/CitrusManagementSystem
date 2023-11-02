@@ -238,6 +238,87 @@ public class TraitServiceImpl implements ITraitService
         return sum / values.size();
     }
 
+    public static String calculateDateMax(List<String> dateData) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+            long[] timestamps = new long[dateData.size()];
+
+            // Convert date strings to timestamps and calculate the sum
+            long sum = 0;
+            long maxTimestamp = Long.MIN_VALUE;
+
+            for (int i = 0; i < dateData.size(); i++) {
+                try {
+                    Date date = dateFormat.parse(dateData.get(i));
+                    long timestamp = date.getTime();
+                    timestamps[i] = timestamp;
+                    sum += timestamp;
+
+                    if (timestamp > maxTimestamp) {
+                        maxTimestamp = timestamp;
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            // Convert timestamps back to date format and output
+            String maxDate = dateFormat.format(new Date(maxTimestamp));
+            return maxDate;
+    }
+
+    public static String calculateDateMin(List<String> dateData) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                long[] timestamps = new long[dateData.size()];
+
+                // Convert date strings to timestamps and calculate the sum
+                long sum = 0;
+                long minTimestamp = Long.MAX_VALUE;
+
+                for (int i = 0; i < dateData.size(); i++) {
+                    try {
+                        Date date = dateFormat.parse(dateData.get(i));
+                        long timestamp = date.getTime();
+                        timestamps[i] = timestamp;
+                        sum += timestamp;
+
+                        if (timestamp < minTimestamp) {
+                            minTimestamp = timestamp;
+                        }
+
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // Convert timestamps back to date format and output
+                String minDate = dateFormat.format(new Date(minTimestamp));
+                return minDate;
+    }
+
+    public static String calculateDateAverage(List<String> dateData) {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                    long[] timestamps = new long[dateData.size()];
+
+                    // Convert date strings to timestamps and calculate the sum
+                    long sum = 0;
+
+                    for (int i = 0; i < dateData.size(); i++) {
+                        try {
+                            Date date = dateFormat.parse(dateData.get(i));
+                            long timestamp = date.getTime();
+                            timestamps[i] = timestamp;
+                            sum += timestamp;
+
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    // Calculate the average
+                    long average = sum / dateData.size();
+                    // Convert timestamps back to date format and output
+                    String avgDate = dateFormat.format(new Date(average));
+                    return avgDate;
+    }
+
 
 
     @Override
@@ -427,10 +508,11 @@ public class TraitServiceImpl implements ITraitService
 
         //遍历每一行 获取全部数据
         //日期单独处理
-        List<String> dateData = new ArrayList<>();
-        String dateName = "";
+        HashMap<String,List<String>> dateMap = new HashMap<>();
+
         //百分比单独处理
-        List<Double> percentList = new ArrayList<>();
+        HashMap<String,List<Double>> percentMap = new HashMap<>();
+
         for (int i = 0; i < maps.size(); i++) {
             //从maps中以此获取想要的数据
             Map<String, Object> map = maps.get(i);
@@ -454,12 +536,30 @@ public class TraitServiceImpl implements ITraitService
                     } catch (NumberFormatException e) {
                         System.err.println("百分数转换小数失败");
                     }
-                    percentList.add(percent);
-                    datanumber.put(traitName,percentList);
+
+                    List<Double> percentValues;
+                    if(percentMap.containsKey(traitName)){
+                        percentValues = percentMap.get(traitName);
+                        percentValues.add(percent);
+                    }
+                    else {
+                        percentValues = new ArrayList<>();
+                        percentValues.add(percent);
+                    }
+                    percentMap.put(traitName,percentValues);
+                    datanumber.put(traitName,percentMap.get(traitName));
                 } else if (o.toString().contains("/")) {
+                    List<String> dateValues;
+                        if(dateMap.containsKey(traitName)){
+                            dateValues = dateMap.get(traitName);
+                            dateValues.add(o.toString());
+                        }
+                        else {
+                            dateValues = new ArrayList<>();
+                            dateValues.add(o.toString());
+                        }
                     List<Double> doubles = new ArrayList<>();
-                    dateName = traitName;
-                    dateData.add(o.toString());
+                    dateMap.put(traitName,dateValues);
                     datanumber.put(traitName,doubles);
                 } else {
                     Double value = Double.valueOf(o.toString());
@@ -531,41 +631,10 @@ public class TraitServiceImpl implements ITraitService
             //即将返回的数据内容
             DataAnalysisVO dataAnalysisVO =new DataAnalysisVO();
 
-            if(dateName.equals(name)){
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-                long[] timestamps = new long[dateData.size()];
-
-                // Convert date strings to timestamps and calculate the sum
-                long sum = 0;
-                long minTimestamp = Long.MAX_VALUE;
-                long maxTimestamp = Long.MIN_VALUE;
-
-                for (int i = 0; i < dateData.size(); i++) {
-                    try {
-                        Date date = dateFormat.parse(dateData.get(i));
-                        long timestamp = date.getTime();
-                        timestamps[i] = timestamp;
-                        sum += timestamp;
-
-                        if (timestamp < minTimestamp) {
-                            minTimestamp = timestamp;
-                        }
-
-                        if (timestamp > maxTimestamp) {
-                            maxTimestamp = timestamp;
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                // Calculate the average
-                long average = sum / dateData.size();
-
-                // Convert timestamps back to date format and output
-                String minDate = dateFormat.format(new Date(minTimestamp));
-                String maxDate = dateFormat.format(new Date(maxTimestamp));
-                String avgDate = dateFormat.format(new Date(average));
+            if(dateMap.containsKey(name)){
+                String minDate = calculateDateMin(dateMap.get(name));
+                String maxDate = calculateDateMax(dateMap.get(name));
+                String avgDate = calculateDateAverage(dateMap.get(name));
 
                 dataAnalysisVO.setTriatId(trait.getTraitId());
                 dataAnalysisVO.setTraitName(trait.getTraitName());
