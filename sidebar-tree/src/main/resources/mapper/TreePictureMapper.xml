@@ -14,6 +14,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
     </resultMap>
+    <resultMap id="SidebarTreeMap" type="com.feidian.sidebarTree.domain.SidebarTree">
+        <result property="treeName" column="tree_name"/>
+        <result property="treeId" column="tree_id"/>
+    </resultMap>
 
     <sql id="selectTreePictureVo">
         select picture_id, picture_url, tree_id, is_show,shot_time,less_picture_url,create_time,update_time from tree_picture
@@ -40,21 +44,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
         or tree_id = #{treeId} and is_show = 1
     </select>
-    
-    <select id="selectTreePictureCountByTreeId" resultType="map">
-        SELECT (WITH RECURSIVE sub_tree AS (
-            SELECT tree_id FROM sidebar_tree WHERE tree_id = ss.tree_id
-            UNION ALL
-            SELECT t.tree_id FROM sidebar_tree t JOIN sub_tree s ON t.parent_id = s.tree_id
-        )
-                SELECT SUM(image_count)
-                FROM (
-                         SELECT COUNT(*) AS image_count FROM tree_picture WHERE tree_id IN (SELECT tree_id FROM sub_tree)
-                     ) t) value, ss.tree_name name FROM sidebar_tree ss WHERE parent_id = #{tree_id}
 
+    <select id="selectTreePictureCountByTreeId" resultType="java.lang.Integer">
+        select count(*) from tree_picture where (tree_id in (select tree_id from sidebar_tree where parent_id = #{treeId})) or tree_id = #{treeId}
     </select>
     <select id="selectPictureUrlById" resultType="java.lang.String">
         select picture_url from tree_picture where picture_id = #{pictureId}
+    </select>
+    <select id="selectNodeMessage" resultType="com.feidian.sidebarTree.domain.SidebarTree">
+        select tree_name,tree_id from sidebar_tree where parent_id = #{treeId}
+    </select>
+    <select id="selectTreePictureCountByTreeIdAndTime" resultType="java.util.Map">
+        select DATE(create_time),count(*)
+        from citrus.phenotype_file
+        where tree_id = #{treeId}
+          and create_time between #{startDate} and #{endDate}
+        group by DATE(create_time)
+        order by DATE(create_time);
+
     </select>
 
     <insert id="insertTreePicture" parameterType="TreePicture" useGeneratedKeys="true" keyProperty="pictureId">

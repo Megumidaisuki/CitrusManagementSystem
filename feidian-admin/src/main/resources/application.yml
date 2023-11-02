@@ -1,7 +1,7 @@
 # 项目相关配置
 feidian:
   # 名称
-  name: YuZhong
+  name: Citrus
   # 版本
   version: 3.8.3
   # 版权年份
@@ -10,6 +10,8 @@ feidian:
   demoEnabled: true
   # 文件路径 示例（ Windows配置D:/feidian/uploadPath，Linux配置 /home/feidian/uploadPath）
   profile: C:\feidian\ganju\uploadPath
+  # 分片文件路径
+  chunkUploadPath: C:\feidian\ganju\chunkUploadPath\
   #任务结
   taskUploadPath: C:\feidian\ganju\taskUpload
   #任务结果存储

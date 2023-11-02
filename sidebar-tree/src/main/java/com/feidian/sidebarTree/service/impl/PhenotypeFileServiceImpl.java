@@ -169,7 +169,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
      */
     @Transactional
     @Override
-    public String uploadFile(Long treeId, MultipartFile file, int fileStatus, String remark, String fileName) throws ServiceException, IOException {
+    public String uploadFile(Long treeId, MultipartFile file, int fileStatus, String remark, String fileName,int pointStatus) throws ServiceException, IOException {
         Long userId = getUserId();
         if (file!=null){
             //获取原文件名
@@ -181,7 +181,9 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 //获取后缀名
                 String suffixName = filename.substring(filename.lastIndexOf("."));
                 if (suffixName.equals(".xlsx")) {
-                    FileUtil.save(file,filePath);
+                    if(pointStatus == 1) {
+                        FileUtil.save(file, filePath);
+                    }
                     String newFilePath = filePath.substring(0,filePath.length() - 5) + ".csv";
                     CsvUtils.xlsx2Csv(filePath,newFilePath);
                     File delFile = new File(filePath);
@@ -194,7 +196,12 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     throw new ServiceException("文件格式错误");
                 }else{
                     //1.保存文件
-                    boolean save = FileUtil.save(file, filePath);
+                    boolean save;
+                    if(pointStatus == 1) {
+                        save = FileUtil.save(file, filePath);
+                    }else{
+                        save = true;
+                    }
                     if (!save) throw new ServiceException("文件保存失败");
                 }
                 PhenotypeFile phenotypeFile = new PhenotypeFile();

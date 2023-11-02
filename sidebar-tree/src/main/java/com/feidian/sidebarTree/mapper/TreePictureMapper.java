@@ -1,11 +1,13 @@
 package com.feidian.sidebarTree.mapper;
 
+import com.feidian.sidebarTree.domain.SidebarTree;
 import com.feidian.sidebarTree.domain.TreePicture;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 【请填写功能名称】Mapper接口
@@ -67,7 +69,11 @@ public interface TreePictureMapper
     public List<TreePicture> selectTreeByTreeIdAndCreateBy(@Param("treeId") int treeId, @Param("createBy") String createBy);
 
     @MapKey("tree_name")
-    public List<Object> selectTreePictureCountByTreeId(@Param("tree_id") Long treeId);
+    public Integer selectTreePictureCountByTreeId(Long treeId);
 
     String selectPictureUrlById(Integer pictureId);
+
+    List<SidebarTree> selectNodeMessage(int treeId);
+
+    Map<String,Long> selectTreePictureCountByTreeIdAndTime(Long treeId, String startDate, String endDate);
 }

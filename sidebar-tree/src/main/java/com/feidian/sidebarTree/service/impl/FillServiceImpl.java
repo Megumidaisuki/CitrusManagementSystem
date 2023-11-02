@@ -2,21 +2,23 @@ package com.feidian.sidebarTree.service.impl;
 
 import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
+import com.feidian.common.core.domain.AjaxResult;
+import com.feidian.sidebarTree.domain.SidebarTree;
 import com.feidian.sidebarTree.domain.TreeFile;
 import com.feidian.sidebarTree.domain.TreePicture;
+import com.feidian.sidebarTree.domain.vo.SidebarTreeVO;
 import com.feidian.sidebarTree.mapper.TreeFileMapper;
 import com.feidian.sidebarTree.mapper.TreePictureMapper;
 import com.feidian.sidebarTree.service.FillService;
-import com.feidian.sidebarTree.utils.DownloadFileUtil;
-import com.feidian.sidebarTree.utils.FileUtil;
-import com.feidian.sidebarTree.utils.ImageUtil;
-import com.feidian.sidebarTree.utils.UnPackeUtil;
+import com.feidian.sidebarTree.utils.*;
 import net.sf.sevenzipjbinding.SevenZipException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +42,9 @@ public class FillServiceImpl implements FillService {
     @Value("${feidian.profile}")
     private String fileUrl;
 
+    @Value("${feidian.chunkUploadPath}")
+    private String chunkUploadPath;
+
     //文本文件存储文件夹
     private final static String TXT_PATH="txt";
     //图片文件存储文件夹
@@ -56,6 +61,7 @@ public class FillServiceImpl implements FillService {
 
     @Autowired
     private FileUtil fileUtil;
+
 
     /**
      * 上传图片
@@ -408,6 +414,198 @@ public class FillServiceImpl implements FillService {
         if(treeFile==null)
             return null;
         return treeFile;
+    }
+@Transactional
+    @Override
+    public AjaxResult uploadChunk(MultipartFile chunk, int totalChunks, int currentChunk) {
+
+        String fileName = chunk.getOriginalFilename();
+        String part = "%"+(currentChunk+1) +"%-"+ totalChunks;
+        String filePath = chunkUploadPath + fileName+part;
+        try (FileOutputStream fos = new FileOutputStream(new File(filePath), true)) {
+             FileCopyUtils.copy(chunk.getBytes(), fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return AjaxResult.success("文件片段上传成功",fileName);
+    }
+@Transactional
+    public AjaxResult mergeChunks(String fileName,int treeId,int isShow) {
+        String directoryPath = chunkUploadPath; // 目录路径
+        String outputFilePath = fileUrl; // 合并后的文件输出路径
+        String filePath = getFileUrl(fileName,treeId);
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
+        //判断文件名是否为xlxs格式，如果是，则为表型数据上传调用，跳过存数据库的处理，此时只需将文件上传到服务器即可
+        if(!(suffix.equals("xlsx") || suffix.equals("csv"))) {
+            TreePicture treePicture = new TreePicture();
+            String fileType = getFileType(filePath);
+            if (!"png".equals(fileType)) {
+                String PngFilePath = filePath.substring(0, filePath.lastIndexOf(".") + 1) + "png";//转换为png格式便于后续Python操作
+                System.out.println(filePath + "*");
+                ImageUtil.JPEGtoPNGConverter(filePath, PngFilePath);
+                filePath = PngFilePath;
+            }
+            treePicture.setPictureUrl(filePath);
+            treePicture.setIsShow(isShow);
+            treePicture.setTreeId((long) treeId);
+            //创建略缩图
+            String pictureUrl = treePicture.getPictureUrl();
+            File file2 = new File(pictureUrl);
+            StringBuffer absoluteFile = new StringBuffer(file2.getAbsoluteFile().getName());
+            int i = absoluteFile.lastIndexOf(".");
+            String lesspic = new String(file2.getParent() + "\\" + absoluteFile.insert(i, 2).toString());
+            treePicture.setLessPictureUrl(lesspic);
+
+            try {
+                treePicture.setCreateBy(getUserId().toString());
+            } catch (Exception e) {
+            }
+            pictureService.insertTreePicture(treePicture);
+        }
+        //分块文件合并
+        try {
+            File directory = new File(directoryPath);
+            File outputFile = new File(filePath);
+            boolean newFile = outputFile.createNewFile();
+            System.out.println(newFile);
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+            File[] Afiles = directory.listFiles();
+            ArrayList<File> files = new ArrayList<>();
+            int temnum = 0;
+            String name0 ;
+            for (int j = 0; j < Afiles.length; j++) {
+                name0 = Afiles[j].getName();
+                if(Afiles[j].getName().substring(0,name0.indexOf("%")).equals(fileName)){
+                    files.add(Afiles[j]);
+                    temnum++;
+                }
+            }
+            if (!files.isEmpty()) {
+                Collections.sort(files, new Comparator<File>() {
+                    @Override
+                    public int compare(File file1, File file2) {
+                        // 根据需要的排序规则进行比较
+                        String name1 = file1.getName();
+                        String name2 = file2.getName();
+                        String match1 = name1.substring(name1.indexOf("%")+1, name1.lastIndexOf("%"));
+                        String match2 = name2.substring(name2.indexOf("%")+1, name2.lastIndexOf("%"));
+                        System.out.println(match1+" "+match2);
+                        int i = (Integer.valueOf(match1) > Integer.valueOf(match2)) ? 1 : -1;
+                        System.out.println(i);
+                        return i;
+                    }
+                });
+            }
+            for (int j = 0; j < files.size(); j++) {
+                File file= files.get(j);
+                if (file.isFile()) {
+                    System.out.println(file.getAbsolutePath());
+                    FileInputStream fis = new FileInputStream(file);
+                    BufferedInputStream bis = new BufferedInputStream(fis);
+
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+
+                    while ((bytesRead = bis.read(buffer)) != -1) {
+                        bos.write(buffer, 0, bytesRead);
+                    }
+
+                    bis.close();
+                    fis.close();
+                }
+            }
+            bos.flush();
+            bos.close();
+
+            System.out.println("文件合并完成！");
+            Thread.sleep(1000);
+
+            if (files != null) {
+                for (File file : files) {
+                        file.delete(); // 删除文件
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        File loadFile = new File(filePath);
+        try {
+            if (!loadFile.getParentFile().exists()){
+                loadFile.getParentFile().mkdirs();
+            }
+            ImageUtil.lessFiles(filePath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return AjaxResult.success("合并成功");
+    }
+
+    @Override
+    public AjaxResult getDocumentNum(int treeId,String startDate,String endDate){
+        String formatStartDate = formatDate(startDate);
+        String formatEndDate = formatDate(endDate);
+        List<SidebarTree> trees = pictureService.selectNodeMessage(treeId);
+        List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
+        Map<String,Map<String,Long>> allList = new HashMap<>();
+        for(SidebarTreeVO sidebarTreeVO:sidebarTreeVOS){
+            Map<String, Long> map = pictureService.selectTreePictureCountByTreeIdAndTime(sidebarTreeVO.getTreeId(), formatStartDate, formatEndDate);
+            allList.put(sidebarTreeVO.getTreeName(),map);
+        }
+        //对集合处理，使前端更好操作
+         Map<String,List<Long>> setList = new HashMap<>();
+        Set<Map.Entry<String, Map<String, Long>>> entries = allList.entrySet();
+        for (Map.Entry<String, Map<String, Long>> entry : entries) {
+            Map<String, Long> value = entry.getValue();
+            List<Long> fileList = getFileList(value, startDate, endDate);
+            setList.put(entry.getKey(),fileList);
+        }
+        return AjaxResult.success(setList);
+    }
+    public static List<Long> getFileList(Map<String, Long> fileCountMap, String startDate, String endDate) {
+        List<Long> fileList = new ArrayList<>();
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar startCalendar = Calendar.getInstance();
+            Calendar endCalendar = Calendar.getInstance();
+
+            startCalendar.setTime(sdf.parse(startDate));
+            endCalendar.setTime(sdf.parse(endDate));
+
+            while (startCalendar.before(endCalendar) || startCalendar.equals(endCalendar)) {
+                String currentDate = sdf.format(startCalendar.getTime());
+
+                if (fileCountMap.containsKey(currentDate)) {
+                    fileList.add(fileCountMap.get(currentDate));
+                } else {
+                    fileList.add(0L);
+                }
+
+                startCalendar.add(Calendar.DATE, 1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fileList;
+    }
+
+    public String formatDate(String date) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date parse = null;
+        try {
+            parse = inputFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return outFormat.format(parse);
+
     }
 
 }

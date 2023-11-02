@@ -1,6 +1,7 @@
 package com.feidian.sidebarTree.controller;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,36 @@ public class TreePictureController extends BaseController
         }
         return AjaxResult.error();
     }
+
+    @GetMapping("/DocumentNum")
+
+    public AjaxResult getDocumentNum(int treeId,String startDate,String endDate) throws ParseException {
+        //TODO 返回map集合
+        return fillService.getDocumentNum(treeId,startDate,endDate);
+
+    }
+
+
+
+
+    @PostMapping("/uploadChunk")
+    public AjaxResult uploadChunk(@RequestParam("file") MultipartFile chunk,
+                                  int totalChunks,
+                                  int currentChunk){
+
+        return fillService.uploadChunk(chunk,totalChunks,currentChunk);
+
+    }
+
+
+
+    @PostMapping("/mergeChunks")
+    public AjaxResult mergeChunks(@RequestParam("fileName") String fileName,@RequestParam("treeId") int treeId,@RequestParam("isShow") int isShow){
+        return fillService.mergeChunks(fileName,treeId,isShow);
+    }
+
+
+
 
     @PostMapping("/uploadFromIp")
     public AjaxResult uploadFromIp(int treeId,@RequestParam("file") MultipartFile file){
@@ -189,6 +220,10 @@ public class TreePictureController extends BaseController
             throw new Exception("文件下载失败");
         }
     }
+
+    @GetMapping("/chunkDownload")
+    
+
 
     /**
      * 新增【请填写功能名称】

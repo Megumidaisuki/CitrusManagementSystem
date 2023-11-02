@@ -1,5 +1,6 @@
 package com.feidian.sidebarTree.service;
 
+import com.feidian.common.core.domain.AjaxResult;
 import com.feidian.sidebarTree.domain.TreeFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,4 +31,9 @@ public interface FillService {
 
     TreeFile getFile(Integer id);
 
+    AjaxResult uploadChunk(MultipartFile chunk, int totalChunks, int currentChunk);
+
+    AjaxResult mergeChunks(String fileName,int treeId,int isShow);
+
+    AjaxResult getDocumentNum(int treeId,String startDate,String endDate) throws ParseException;
 }
