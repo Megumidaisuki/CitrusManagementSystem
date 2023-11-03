@@ -293,10 +293,13 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             insertSQLBuilder.append("null,");
                         }
                         //拼接性状列
+                        //空性状数 = 总性状数 - （非空性状数 - 材料名）（被包含在非空性状数中）
+                        int num = traitId - data.get(i).length + 1;
                         for (int j = 0; j < traitId ; j++) {
                             Long id = traitMap.get(headers[j + 1]);
                             String value = null;
-                            value = data.get(i)[j + 1];
+                            if (j < traitId - num) value = data.get(i)[j + 1];
+
                             //如果性状id不在性状表中，则新增性状
                             if (ObjectUtils.isEmpty(id)){
                                 //新增性状
@@ -311,11 +314,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                                 traitMap.put(trait.getTraitName(),id);
                             }
                             if(ObjectUtils.isEmpty(id))
-                                insertSQLBuilder.append("null,");
+                                insertSQLBuilder.append("null");
                             else
                                 insertSQLBuilder.append("'").append(id).append("'").append(",");
                             if(StringUtils.isEmpty(value))
-                                insertSQLBuilder.append("null,");
+                                insertSQLBuilder.append("null");
                             else
                                 insertSQLBuilder.append("'").append(value).append("'");
                             if(j < traitId - 1) insertSQLBuilder.append(",");
