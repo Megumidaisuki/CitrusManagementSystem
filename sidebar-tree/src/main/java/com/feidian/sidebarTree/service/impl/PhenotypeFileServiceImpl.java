@@ -33,6 +33,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -635,6 +636,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 }
                 // 拿到 表列→表格行 映射
                 Integer[] columnIndex = (Integer[]) createColumnIndex(headers, tableName, false);
+                Set<Integer> columnIndexSet = Arrays.stream(columnIndex)
+                        .collect(Collectors.toCollection(HashSet::new));
+                //删除材料名和备注
+                columnIndexSet.remove(columnIndex[0]);
+                columnIndexSet.remove(columnIndex[1]);
                 // 7.1 对旧行的新列填充数据 预备
                 StringBuilder insertOldLineStringBuilder = new StringBuilder("insert into ").append(tableName).append(" (phenotype_id,");
                 ArrayList<String> newColumnString = new ArrayList<>();
@@ -645,20 +651,23 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     lineCount++;
                 }
                 insertOldLineStringBuilder.deleteCharAt(insertOldLineStringBuilder.length() - 1).append(") values");
+
                 // 7.2 行扩增
-                long count = 0L;
                 HashMap<String, Long> traitsMap = infoUtil.getTraitsMap();
 
                 StringBuilder insertSqlBuilder = new StringBuilder("insert into " + tableName + " (phenotype_id,material_id,create_by,create_time,update_by,update_time,remark");
                 List<String> traitParam = phenotypeFileMapper.getAllTraitIdAndValueColumnsWithSorted(tableName);
                 for (String param : traitParam) {
-                    insertSqlBuilder.append(",").append(param);
+                    String[] s = param.split("_");
+                    // +1是为了消除备注在数据库当中对性状位置的影响
+                    if (columnIndexSet.contains(Integer.parseInt(s[2]) + 1))
+                        insertSqlBuilder.append(",").append(param);
                 }
                 insertSqlBuilder.append(") values");
-                while(csvReader.readRecord()){
+
+                List<String[]> newData = createNewRow(filePath,tableName);
+                for (String[] data : newData) {
                     //行扩增
-                    if(count >= tableLines) {
-                        String[] data = csvReader.getValues();
                         //提起材料名称
                         String materialId = data[0];
                         StringBuilder insertDataBuilder = new StringBuilder("(");
@@ -678,23 +687,15 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             if(index == 0) continue;
                             if(traitsMap.get(headers[index]) != null && !headers[index].equals("备注")){
                                 insertDataBuilder.append(StringUtils.isEmpty(headers[index])?"null," : (ObjectUtils.isEmpty(traitsMap.get(headers[index]))?"null," : "'" + traitsMap.get(headers[index]) + "',"));
-                                insertDataBuilder.append("'").append(data[index]).append("'");}
+                                insertDataBuilder.append("'").append(data[index]).append("'");
+                            }
                             else insertDataBuilder.append(StringUtils.isEmpty(data[index])?"null":"'" + data[index] + "'");
                             if(commaNum < columnIndex.length) insertDataBuilder.append(",");
                         }
                         insertDataBuilder.append("),");
                         insertSqlBuilder.append(insertDataBuilder);
-                        count++;
-                    }else{
-                        //对旧行新列填充数据
-                        String[] data = csvReader.getValues();
-                        insertOldLineStringBuilder.append("(").append(++count).append(",");
-                        for (int i = 0; i < columnErrorList.size(); i++) {
-                            insertOldLineStringBuilder.append(StringUtils.isEmpty(data[columErrorIndex.get(i)])?"null":"'"+data[columErrorIndex.get(i)]+"'").append(",");
-                        }
-                        insertOldLineStringBuilder.deleteCharAt(insertOldLineStringBuilder.length() - 1).append("),");
-                    }
                 }
+
                 // 7.3 对旧行的新列填充数据 执行
                 insertOldLineStringBuilder.deleteCharAt(insertOldLineStringBuilder.length() - 1);
                 insertOldLineStringBuilder.append(" on duplicate key update ");
@@ -702,13 +703,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     insertOldLineStringBuilder.append(newColumnString.get(i)).append("=values(").append(newColumnString.get(i)).append("),");
                 }
                 insertOldLineStringBuilder.deleteCharAt(insertOldLineStringBuilder.length() - 1).append(";");
-                if(newColumn)
-                    excuteMapper.excute(insertOldLineStringBuilder.toString());
+
                 //插入新数据
                 insertSqlBuilder.deleteCharAt(insertSqlBuilder.length()-1);
                 String insertSql = insertSqlBuilder.toString();
-                if (count > tableLines)
-                    excuteMapper.excute(insertSql);
+                excuteMapper.excute(insertSql);
                 // 8.  表型文件表新增记录
                 phenotypeFile.setFileId(null);
                 phenotypeFile.setFileName(fileName);
@@ -730,7 +729,38 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
         return true;
     }
 
+    //获取要新增的数据,删除旧行，准备覆盖
+    private List<String[]> createNewRow(String filePath, String tableName) throws IOException {
+        // TODO
+        // 1.首先拿到数据库已有的材料名
+        HashSet<String> materialIdSet = phenotypeFileMapper.seleteMaterialIdByTableName(tableName);
+        // 2.用csv读取整个文件，得到一个‘二维数组’
+        HashMap<String, String[]> dataMap =  new HashMap<>();
+        List<String[]> data = new ArrayList<>();
+        //Csv初始化
+        CsvReader csvReader;
+        String[] headers = new String[0];
+        csvReader = new CsvReader(filePath,',', Charset.forName("GBK"));
+        if (csvReader.readRecord()) {
+            headers = csvReader.getRawRecord().split(",");
+        }
+        while(csvReader.readRecord()){
+            data.add(csvReader.getValues());
+        }
 
+        // 3.比对材料名，找出新csv中的老行
+        List<String> materialIdList = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            String s = data.get(i)[0];
+            if (materialIdSet.contains(s)) materialIdList.add(s);
+        }
+
+        // 3.1删除数据库中的老行
+        String[] ss = materialIdList.toArray(new String[0]);
+        if(ss.length != 0) phenotypeFileMapper.deletePhenotypeFileByMaterialId(tableName, materialIdList.toArray(new String[0]));
+
+        return data;
+    }
 
     //建立列关系索引
     private Object[] createColumnIndex(String[] headers,String tableName,boolean canNull){
@@ -777,7 +807,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             //如果出现空列，后面的列就单判异常
                             nullFlag = true;
 
-//                            throw new ServiceException("数据完整性遭到破坏，请删除错误数据并重启后端服务");
+//                          throw new ServiceException("数据完整性遭到破坏，请删除错误数据并重启后端服务");
                         }
                     }
                 }

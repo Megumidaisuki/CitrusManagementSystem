@@ -1,5 +1,6 @@
 package com.feidian.sidebarTree.mapper;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -162,4 +163,8 @@ public interface PhenotypeFileMapper
     int selectTableCount(String tableName);
 
     long selectPhenotypeFileListCountByTableName(@Param("tableName") String tableName);
+
+    HashSet<String> seleteMaterialIdByTableName(@Param("tableName") String tableName);
+
+    void deletePhenotypeFileByMaterialId(@Param("tableName")String tableName, @Param("materialIds")String[] materialIds);
 }
