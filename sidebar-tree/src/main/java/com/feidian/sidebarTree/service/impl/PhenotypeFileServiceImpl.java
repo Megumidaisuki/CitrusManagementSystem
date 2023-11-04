@@ -461,6 +461,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 }
                 // 拿到 表列→表格行 映射
                 Integer[] columnIndex = (Integer[]) createColumnIndex(headers, tableName, false);
+                Set<Integer> columnIndexSet = Arrays.stream(columnIndex)
+                        .collect(Collectors.toCollection(HashSet::new));
+                //删除材料名和备注
+                columnIndexSet.remove(columnIndex[0]);
+                columnIndexSet.remove(columnIndex[1]);
                 // 7.1 对旧行的新列填充数据 预备
                 StringBuilder insertOldLineStringBuilder = new StringBuilder("insert into ").append(tableName).append(" (phenotype_id,");
                 ArrayList<String> newColumnString = new ArrayList<>();
@@ -471,14 +476,17 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     lineCount++;
                 }
                 insertOldLineStringBuilder.deleteCharAt(insertOldLineStringBuilder.length() - 1).append(") values");
-                // 7.2 行扩增
 
+                // 7.2 行扩增
                 HashMap<String, Long> traitsMap = infoUtil.getTraitsMap();
 
                 StringBuilder insertSqlBuilder = new StringBuilder("insert into " + tableName + " (phenotype_id,material_id,create_by,create_time,update_by,update_time,remark");
                 List<String> traitParam = phenotypeFileMapper.getAllTraitIdAndValueColumnsWithSorted(tableName);
                 for (String param : traitParam) {
-                    insertSqlBuilder.append(",").append(param);
+                    String[] s = param.split("_");
+                    // +1是为了消除备注在数据库当中对性状位置的影响
+                    if (columnIndexSet.contains(Integer.parseInt(s[2]) + 1))
+                        insertSqlBuilder.append(",").append(param);
                 }
                 insertSqlBuilder.append(") values");
 
@@ -504,7 +512,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             if(index == 0) continue;
                             if(traitsMap.get(headers[index]) != null && !headers[index].equals("备注")){
                                 insertDataBuilder.append(StringUtils.isEmpty(headers[index])?"null," : (ObjectUtils.isEmpty(traitsMap.get(headers[index]))?"null," : "'" + traitsMap.get(headers[index]) + "',"));
-                                insertDataBuilder.append("'").append(data[index]).append("'");}
+                                insertDataBuilder.append("'").append(data[index]).append("'");
+                            }
                             else insertDataBuilder.append(StringUtils.isEmpty(data[index])?"null":"'" + data[index] + "'");
                             if(commaNum < columnIndex.length) insertDataBuilder.append(",");
                         }
@@ -623,7 +632,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                             //如果出现空列，后面的列就单判异常
                             nullFlag = true;
 
-//                            throw new ServiceException("数据完整性遭到破坏，请删除错误数据并重启后端服务");
+//                          throw new ServiceException("数据完整性遭到破坏，请删除错误数据并重启后端服务");
                         }
                     }
                 }
