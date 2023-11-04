@@ -159,6 +159,14 @@
         where table_name = #{tableName}
           and tree_id = -1
     </delete>
+    <delete id="deletePhenotypeFileByMaterialId">
+        delete from ${tableName} where material_id in
+        <foreach item="materialIds" collection="materialIds" open="(" separator="," close=")">
+            #{materialIds}
+        </foreach>
+    </delete>
+
+
     <select id="selectPopulationBySpecies" resultType="java.lang.Long">
         select population_id
         from phenotype_file
@@ -280,7 +288,7 @@
     <select id="selectTraitBindingByTableName" resultType="java.util.Map">
         select ${columns}
         from ${tableName}
-        where phenotype_id = 1;
+        where phenotype_id = (select min(phenotype_id) from ${tableName});
     </select>
     <!--    <select id="getAreaName" resultType="java.lang.String">-->
     <!--        select distinct(location)-->
@@ -327,6 +335,10 @@
     </select>
     <select id="selectPhenotypeFileListCountByTableName" resultType="java.lang.Long">
         select count(*) from phenotype_file where table_name = #{tableName} and tree_id != -1
+    </select>
+
+    <select id="seleteMaterialIdByTableName" resultType="java.lang.String">
+        select material_id from ${tableName}
     </select>
 
 </mapper>
