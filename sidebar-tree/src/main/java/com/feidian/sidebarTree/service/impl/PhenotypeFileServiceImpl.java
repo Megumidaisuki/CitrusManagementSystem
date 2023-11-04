@@ -347,6 +347,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
     @Transactional
     @Override
     public String uploadFile(Long treeId, MultipartFile file, int fileStatus, String remark, String fileName,int pointStatus,String filePath) throws ServiceException, IOException {
+        filePath = filePath.replace("**","\\");
         Long userId = getUserId();
         if (file!=null){
             //获取原文件名
