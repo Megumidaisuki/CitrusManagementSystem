@@ -578,6 +578,29 @@ public class FillServiceImpl implements FillService {
         }
         return AjaxResult.success(setList);
     }
+
+    @Override
+    public AjaxResult getAllDocumentNum(int treeType, String startDate, String endDate) throws ParseException {
+        String formatStartDate = formatDate(startDate);
+        String formatEndDate = formatDate(endDate);
+        List<SidebarTree> trees = pictureService.selectAllNodeMessage(treeType);
+        List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
+        Map<String,Map<String,Long>> allList = new HashMap<>();
+        for(SidebarTreeVO sidebarTreeVO:sidebarTreeVOS){
+            Map<String, Long> map = pictureService.selectTreePictureCountByTreeIdAndTime(sidebarTreeVO.getTreeId(), formatStartDate, formatEndDate);
+            allList.put(sidebarTreeVO.getTreeName(),map);
+        }
+        //对集合处理，使前端更好操作
+        Map<String,List<Long>> setList = new HashMap<>();
+        Set<Map.Entry<String, Map<String, Long>>> entries = allList.entrySet();
+        for (Map.Entry<String, Map<String, Long>> entry : entries) {
+            Map<String, Long> value = entry.getValue();
+            List<Long> fileList = getFileList(value, startDate, endDate);
+            setList.put(entry.getKey(),fileList);
+        }
+        return AjaxResult.success(setList);
+    }
+
     public static List<Long> getFileList (Map < String, Long > fileCountMap, String startDate, String endDate){
         List<Long> fileList = new ArrayList<>();
 

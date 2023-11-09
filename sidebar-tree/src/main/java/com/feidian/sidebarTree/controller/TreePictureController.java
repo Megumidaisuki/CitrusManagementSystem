@@ -254,4 +254,18 @@ public class TreePictureController extends BaseController
     {
         return toAjax(treePictureService.deleteTreePictureByPictureId((long)pictureId));
     }
+    @GetMapping("/AllDocumentNum")
+
+    public AjaxResult getAllDocumentNum(int treeType,String startDate,String endDate) throws ParseException {
+        //TODO 返回map集合
+        return fillService.getAllDocumentNum(treeType,startDate,endDate);
+
+    }
+    @GetMapping("/AllCount")
+    public AjaxResult AllNodePicCount(Integer treeType){
+        return AjaxResult.success(treePictureService.getAllNodePicCount(treeType));
+    }
+
+
+
 }

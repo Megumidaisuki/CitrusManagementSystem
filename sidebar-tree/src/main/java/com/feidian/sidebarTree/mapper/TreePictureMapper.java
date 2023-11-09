@@ -16,8 +16,7 @@ import java.util.Map;
  * @date 2022-07-03
  */
 @Mapper
-public interface TreePictureMapper
-{
+public interface TreePictureMapper {
     /**
      * 查询【请填写功能名称】
      *
@@ -75,5 +74,7 @@ public interface TreePictureMapper
 
     List<SidebarTree> selectNodeMessage(int treeId);
 
-    Map<String,Long> selectTreePictureCountByTreeIdAndTime(@Param("treeId") Long treeId, @Param("startDate") String startDate,@Param("endDate") String endDate);
+    Map<String, Long> selectTreePictureCountByTreeIdAndTime(@Param("treeId") Long treeId, @Param("startDate") String startDate, @Param("endDate") String endDate);
+
+    List<SidebarTree> selectAllNodeMessage(int treeType);
 }
