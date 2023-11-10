@@ -276,9 +276,11 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         //设置材料名称
                         String materialId = data.get(i)[0];
 
+                        //拼接前置列
                         insertSQLBuilder.append("(");
                         for (int j = 0; j < 6; j++) {
-                            if(j >= data.get(i).length || StringUtils.isEmpty(data.get(i)[j])) insertSQLBuilder.append("null");
+                            //if(j >= data.get(i).length || StringUtils.isEmpty(data.get(i)[j])) insertSQLBuilder.append("null");
+                            if(j >= data.get(i).length ) insertSQLBuilder.append("null");
                             else if(j == 0) insertSQLBuilder.append("NULL");
                             else if(j == 1) insertSQLBuilder.append("'" + materialId + "'");
                             else if(j == 2) insertSQLBuilder.append("'" + getLoginUser().getUsername() + "'");
