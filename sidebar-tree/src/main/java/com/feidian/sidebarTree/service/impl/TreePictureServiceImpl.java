@@ -137,7 +137,7 @@ public class TreePictureServiceImpl implements ITreePictureService
     public Map<String, Integer> getAllNodePicCount(Integer treeType) {
         HashMap<String, Integer> hashMap = new HashMap<>();
         List<SidebarTree> sidebarTrees = treePictureMapper.selectAllNodeMessage(treeType);
-        List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(sidebarTrees, SidebarTreeVO.class);
+         List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(sidebarTrees, SidebarTreeVO.class);
         sidebarTreeVOS.stream()
                 .forEach(e -> {
                     Integer count = treePictureMapper.selectTreePictureCountByTreeId(e.getTreeId());

@@ -67,12 +67,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by DATE(create_time);
 
     </select>
-    <select id="selectAllNodeMessage" resultType="com.feidian.sidebarTree.domain.SidebarTree">
-        select tree_name, tree_id
+    <select id="selectAllNodeMessage" resultMap= "SidebarTreeMap">
+        select tree_id, tree_name
         from citrus.sidebar_tree
         where parent_id in (select tree_id
-                            from sidebar_tree
-                            where parent_id in (select tree_id from sidebar_tree where tree_type = #{treeType}));
+                            from citrus.sidebar_tree
+                            where parent_id in (select tree_id
+                                                from citrus.sidebar_tree
+                                                where parent_id in (select tree_id
+                                                                    from citrus.sidebar_tree
+                                                                    where tree_type = #{treeType} and parent_id = 0)));
+
 
     </select>
 

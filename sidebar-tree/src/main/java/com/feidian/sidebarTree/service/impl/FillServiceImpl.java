@@ -596,7 +596,7 @@ public class FillServiceImpl implements FillService {
         Set<Map.Entry<String, Map<String, Long>>> entries = allList.entrySet();
         for (Map.Entry<String, Map<String, Long>> entry : entries) {
             Map<String, Long> value = entry.getValue();
-            List<Long> fileList = getFileList(value, startDate, endDate);
+            List<Long> fileList = getFileList(value, formatStartDate, formatEndDate);
             setList.put(entry.getKey(),fileList);
         }
         return AjaxResult.success(setList);

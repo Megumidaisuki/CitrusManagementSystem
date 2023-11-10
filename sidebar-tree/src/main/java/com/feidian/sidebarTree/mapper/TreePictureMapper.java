@@ -77,5 +77,5 @@ public interface TreePictureMapper {
 
     List<DocumentNumVO> selectTreePictureCountByTreeIdAndTime(@Param("treeId") Long treeId, @Param("startDate") String startDate, @Param("endDate") String endDate);
 
-    List<SidebarTree> selectAllNodeMessage(int treeType);
+    List<SidebarTree> selectAllNodeMessage(@Param("treeType") int treeType);
 }
