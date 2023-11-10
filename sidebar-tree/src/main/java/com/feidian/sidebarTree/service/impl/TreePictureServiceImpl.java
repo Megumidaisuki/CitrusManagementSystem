@@ -1,13 +1,18 @@
 package com.feidian.sidebarTree.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.feidian.common.core.domain.entity.SysRole;
+import com.feidian.sidebarTree.domain.SidebarTree;
 import com.feidian.sidebarTree.domain.TreePicture;
+import com.feidian.sidebarTree.domain.vo.SidebarTreeVO;
 import com.feidian.sidebarTree.mapper.TreePictureMapper;
 import com.feidian.sidebarTree.service.FillService;
 import com.feidian.sidebarTree.service.ITreePictureService;
+import com.feidian.sidebarTree.utils.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -126,5 +131,20 @@ public class TreePictureServiceImpl implements ITreePictureService
     @Override
     public String selectPictureUrlById(Integer pictureId) {
         return treePictureMapper.selectPictureUrlById(pictureId);
+    }
+
+    @Override
+    public Map<String, Integer> getAllNodePicCount(Integer treeType) {
+        HashMap<String, Integer> hashMap = new HashMap<>();
+        List<SidebarTree> sidebarTrees = treePictureMapper.selectAllNodeMessage(treeType);
+        List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(sidebarTrees, SidebarTreeVO.class);
+        sidebarTreeVOS.stream()
+                .forEach(e -> {
+                    Integer count = treePictureMapper.selectTreePictureCountByTreeId(e.getTreeId());
+                    e.setNodeNum(Long.valueOf(count));
+                    hashMap.put(e.getTreeName(),count);
+                });
+
+        return hashMap;
     }
 }

@@ -1,8 +1,11 @@
 package com.feidian.sidebarTree.service;
 
+import com.feidian.common.core.domain.AjaxResult;
 import com.feidian.sidebarTree.domain.TreePicture;
 
+import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 【请填写功能名称】Service接口
@@ -66,4 +69,6 @@ public interface ITreePictureService
 
 
     String selectPictureUrlById(Integer pictureId);
+    Map<String,Integer> getAllNodePicCount(Integer treeType);
+
 }

@@ -14,6 +14,7 @@ import com.feidian.sidebarTree.utils.*;
 import net.sf.sevenzipjbinding.SevenZipException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.xmlbeans.impl.xb.ltgfmt.TestCase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -432,108 +433,112 @@ public class FillServiceImpl implements FillService {
     }
 @Transactional
     public AjaxResult mergeChunks(String fileName,int treeId,int isShow) {
-        String directoryPath = chunkUploadPath; // 目录路径
-        String outputFilePath = fileUrl; // 合并后的文件输出路径
-        String filePath = getFileUrl(fileName,treeId);
-        String suffix = fileName.substring(fileName.lastIndexOf("."));
-        //判断文件名是否为xlxs格式，如果是，则为表型数据上传调用，跳过存数据库的处理，此时只需将文件上传到服务器即可
-        if(!(suffix.equals("xlsx") || suffix.equals("csv"))) {
-            TreePicture treePicture = new TreePicture();
-            String fileType = getFileType(filePath);
-            if (!"png".equals(fileType)) {
-                String PngFilePath = filePath.substring(0, filePath.lastIndexOf(".") + 1) + "png";//转换为png格式便于后续Python操作
-                System.out.println(filePath + "*");
-                ImageUtil.JPEGtoPNGConverter(filePath, PngFilePath);
-                filePath = PngFilePath;
-            }
-            treePicture.setPictureUrl(filePath);
-            treePicture.setIsShow(isShow);
-            treePicture.setTreeId((long) treeId);
-            //创建略缩图
-            String pictureUrl = treePicture.getPictureUrl();
-            File file2 = new File(pictureUrl);
-            StringBuffer absoluteFile = new StringBuffer(file2.getAbsoluteFile().getName());
-            int i = absoluteFile.lastIndexOf(".");
-            String lesspic = new String(file2.getParent() + "\\" + absoluteFile.insert(i, 2).toString());
-            treePicture.setLessPictureUrl(lesspic);
+    String directoryPath = chunkUploadPath; // 目录路径
+    String outputFilePath = fileUrl; // 合并后的文件输出路径
+    String filePath = getFileUrl(fileName, treeId);
+    String fileType = getFileType(filePath);
+    if (!(fileType.equals("xlsx") || fileType.equals("csv"))) {
+        //TODO 实现对文件进行处理，上传到数据库
+        TreePicture treePicture = new TreePicture();
 
-            try {
-                treePicture.setCreateBy(getUserId().toString());
-            } catch (Exception e) {
-            }
-            pictureService.insertTreePicture(treePicture);
+        if (!"png".equals(fileType)) {
+            String PngFilePath = filePath.substring(0, filePath.lastIndexOf(".") + 1) + "png";//转换为png格式便于后续Python操作
+            System.out.println(filePath + "*");
+            ImageUtil.JPEGtoPNGConverter(filePath, PngFilePath);
+            filePath = PngFilePath;
         }
-        //分块文件合并
+        treePicture.setPictureUrl(filePath);
+        treePicture.setIsShow(isShow);
+        treePicture.setTreeId((long) treeId);
+        //创建略缩图
+        String pictureUrl = treePicture.getPictureUrl();
+        File file2 = new File(pictureUrl);
+        StringBuffer absoluteFile = new StringBuffer(file2.getAbsoluteFile().getName());
+        int i = absoluteFile.lastIndexOf(".");
+        String lesspic = new String(file2.getParent() + "\\" + absoluteFile.insert(i, 2).toString());
+        treePicture.setLessPictureUrl(lesspic);
+
         try {
-            File directory = new File(directoryPath);
-            File outputFile = new File(filePath);
-            boolean newFile = outputFile.createNewFile();
-            System.out.println(newFile);
-            FileOutputStream fos = new FileOutputStream(outputFile);
-            BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-            File[] Afiles = directory.listFiles();
-            ArrayList<File> files = new ArrayList<>();
-            int temnum = 0;
-            String name0 ;
-            for (int j = 0; j < Afiles.length; j++) {
-                name0 = Afiles[j].getName();
-                if(Afiles[j].getName().substring(0,name0.indexOf("%")).equals(fileName)){
-                    files.add(Afiles[j]);
-                    temnum++;
-                }
-            }
-            if (!files.isEmpty()) {
-                Collections.sort(files, new Comparator<File>() {
-                    @Override
-                    public int compare(File file1, File file2) {
-                        // 根据需要的排序规则进行比较
-                        String name1 = file1.getName();
-                        String name2 = file2.getName();
-                        String match1 = name1.substring(name1.indexOf("%")+1, name1.lastIndexOf("%"));
-                        String match2 = name2.substring(name2.indexOf("%")+1, name2.lastIndexOf("%"));
-                        System.out.println(match1+" "+match2);
-                        int i = (Integer.valueOf(match1) > Integer.valueOf(match2)) ? 1 : -1;
-                        System.out.println(i);
-                        return i;
-                    }
-                });
-            }
-            for (int j = 0; j < files.size(); j++) {
-                File file= files.get(j);
-                if (file.isFile()) {
-                    System.out.println(file.getAbsolutePath());
-                    FileInputStream fis = new FileInputStream(file);
-                    BufferedInputStream bis = new BufferedInputStream(fis);
-
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-
-                    while ((bytesRead = bis.read(buffer)) != -1) {
-                        bos.write(buffer, 0, bytesRead);
-                    }
-
-                    bis.close();
-                    fis.close();
-                }
-            }
-            bos.flush();
-            bos.close();
-
-            System.out.println("文件合并完成！");
-            Thread.sleep(1000);
-
-            if (files != null) {
-                for (File file : files) {
-                        file.delete(); // 删除文件
-                }
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            treePicture.setCreateBy(getUserId().toString());
+        } catch (Exception e) {
         }
+        pictureService.insertTreePicture(treePicture);
+
+
+    }
+    //分块文件合并
+
+    try {
+        File directory = new File(directoryPath);
+        File outputFile = new File(filePath);
+        boolean newFile = outputFile.createNewFile();
+        System.out.println(newFile);
+        FileOutputStream fos = new FileOutputStream(outputFile);
+        BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+        File[] Afiles = directory.listFiles();
+        ArrayList<File> files = new ArrayList<>();
+        int temnum = 0;
+        String name0;
+        for (int j = 0; j < Afiles.length; j++) {
+            name0 = Afiles[j].getName();
+            if (Afiles[j].getName().substring(0, name0.indexOf("%")).equals(fileName)) {
+                files.add(Afiles[j]);
+                temnum++;
+            }
+        }
+        if (!files.isEmpty()) {
+            Collections.sort(files, new Comparator<File>() {
+                @Override
+                public int compare(File file1, File file2) {
+                    // 根据需要的排序规则进行比较
+                    String name1 = file1.getName();
+                    String name2 = file2.getName();
+                    String match1 = name1.substring(name1.indexOf("%") + 1, name1.lastIndexOf("%"));
+                    String match2 = name2.substring(name2.indexOf("%") + 1, name2.lastIndexOf("%"));
+                    System.out.println(match1 + " " + match2);
+                    int i = (Integer.valueOf(match1) > Integer.valueOf(match2)) ? 1 : -1;
+                    System.out.println(i);
+                    return i;
+                }
+            });
+        }
+        for (int j = 0; j < files.size(); j++) {
+            File file = files.get(j);
+            if (file.isFile()) {
+                System.out.println(file.getAbsolutePath());
+                FileInputStream fis = new FileInputStream(file);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+
+                while ((bytesRead = bis.read(buffer)) != -1) {
+                    bos.write(buffer, 0, bytesRead);
+                }
+
+                bis.close();
+                fis.close();
+            }
+        }
+        bos.flush();
+        bos.close();
+
+        System.out.println("文件合并完成！");
+        Thread.sleep(1000);
+
+        if (files != null) {
+            for (File file : files) {
+                file.delete(); // 删除文件
+            }
+        }
+    } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
+    }
+    if (fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()).equals("png")) {
         File loadFile = new File(filePath);
         try {
-            if (!loadFile.getParentFile().exists()){
+            if (!loadFile.getParentFile().exists()) {
                 loadFile.getParentFile().mkdirs();
             }
             ImageUtil.lessFiles(filePath);
@@ -542,14 +547,43 @@ public class FillServiceImpl implements FillService {
             e.printStackTrace();
         }
 
-        return AjaxResult.success("合并成功");
+
+    }
+    return AjaxResult.success("合并成功",filePath);
+}
+    @Override
+    public AjaxResult getDocumentNum(int treeId, int startDate, int endDate){
+        String formatStartDate = formatDate(String.valueOf(startDate));
+        String formatEndDate = formatDate(String.valueOf(endDate));
+        List<SidebarTree> trees = pictureService.selectNodeMessage(treeId);
+        List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
+        Map<String, Map<String, Long>> allList = new HashMap<>();
+        HashMap<String, Long> test = new HashMap<String, Long>();
+        test.put("test",0L);
+        for (SidebarTreeVO sidebarTreeVO : sidebarTreeVOS) {
+            Long treeId1 = sidebarTreeVO.getTreeId();
+            Map<String, Long> map = pictureService.selectTreePictureCountByTreeIdAndTime(treeId1, formatStartDate, formatEndDate);
+            if(map == null){
+                map = test;
+            }
+            allList.put(sidebarTreeVO.getTreeName(), map);
+        }
+        //对集合处理，使前端更好操作
+        Map<String, List<Long>> setList = new HashMap<>();
+        Set<Map.Entry<String, Map<String, Long>>> entries = allList.entrySet();
+        for (Map.Entry<String, Map<String, Long>> entry : entries) {
+            Map<String, Long> value = entry.getValue();
+            List<Long> fileList = getFileList(value, formatStartDate, formatEndDate);
+            setList.put(entry.getKey(), fileList);
+        }
+        return AjaxResult.success(setList);
     }
 
     @Override
-    public AjaxResult getDocumentNum(int treeId,String startDate,String endDate){
+    public AjaxResult getAllDocumentNum(int treeType, String startDate, String endDate) throws ParseException {
         String formatStartDate = formatDate(startDate);
         String formatEndDate = formatDate(endDate);
-        List<SidebarTree> trees = pictureService.selectNodeMessage(treeId);
+        List<SidebarTree> trees = pictureService.selectAllNodeMessage(treeType);
         List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
         Map<String,Map<String,Long>> allList = new HashMap<>();
         for(SidebarTreeVO sidebarTreeVO:sidebarTreeVOS){
@@ -557,7 +591,7 @@ public class FillServiceImpl implements FillService {
             allList.put(sidebarTreeVO.getTreeName(),map);
         }
         //对集合处理，使前端更好操作
-         Map<String,List<Long>> setList = new HashMap<>();
+        Map<String,List<Long>> setList = new HashMap<>();
         Set<Map.Entry<String, Map<String, Long>>> entries = allList.entrySet();
         for (Map.Entry<String, Map<String, Long>> entry : entries) {
             Map<String, Long> value = entry.getValue();
@@ -566,7 +600,8 @@ public class FillServiceImpl implements FillService {
         }
         return AjaxResult.success(setList);
     }
-    public static List<Long> getFileList(Map<String, Long> fileCountMap, String startDate, String endDate) {
+
+    public static List<Long> getFileList (Map < String, Long > fileCountMap, String startDate, String endDate){
         List<Long> fileList = new ArrayList<>();
 
         try {
@@ -595,7 +630,7 @@ public class FillServiceImpl implements FillService {
         return fileList;
     }
 
-    public String formatDate(String date) {
+    public String formatDate (String date){
         SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date parse = null;
@@ -609,4 +644,3 @@ public class FillServiceImpl implements FillService {
     }
 
 }
-

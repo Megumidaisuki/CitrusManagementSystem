@@ -35,5 +35,7 @@ public interface FillService {
 
     AjaxResult mergeChunks(String fileName,int treeId,int isShow);
 
-    AjaxResult getDocumentNum(int treeId,String startDate,String endDate) throws ParseException;
+    AjaxResult getDocumentNum(int treeId,int startDate,int endDate);
+
+    AjaxResult getAllDocumentNum(int treeType, String startDate, String endDate) throws ParseException;
 }
