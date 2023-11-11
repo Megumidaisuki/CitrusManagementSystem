@@ -476,7 +476,6 @@ public class TraitServiceImpl implements ITraitService
     @Override
     public List<DataAnalysisVO> dataAnalysisBymaterialId(Long id, String materialId) {
 
-
         List<String> result = new ArrayList<>();
         PhenotypeFile file = phenotypeFileMapper.selectPhenotypeFileByFileId(id);
         System.out.println(file);
@@ -618,9 +617,8 @@ public class TraitServiceImpl implements ITraitService
         for (Map.Entry<String, List<Double>> entry : datanumber.entrySet()) {
             String name = entry.getKey();
             List<Double> values = entry.getValue();
-            Trait query =new Trait();
-            query.setTraitName(name);
-            Trait trait = traitMapper.selectTraitListWithoutDeleted(query).get(0);
+
+            Trait trait = traitMapper.selectTraitByTraitNameWithoutDeleted(name);
             Long traitTypeId = null;
             String traitTypeName = "";
             if (traitTypeMap.containsKey(trait.getTraitId())){
@@ -645,7 +643,8 @@ public class TraitServiceImpl implements ITraitService
                 dataAnalysisVO.setMaxNum(maxDate);
                 dataAnalysisVO.setMinNum(minDate);
                 res.add(dataAnalysisVO);
-            }else {
+            }
+            else {
                 double max = calculateMax(datanumber.get(trait.getTraitName()));
                 double min = calculateMin(datanumber.get(trait.getTraitName()));
                 double average = calculateAverage(datanumber.get(trait.getTraitName()));

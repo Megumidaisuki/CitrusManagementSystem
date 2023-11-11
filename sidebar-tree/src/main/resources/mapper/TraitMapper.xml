@@ -79,6 +79,11 @@
                  JOIN citrus.trait_type tt on att.trait_type_id = tt.trait_type_id
     </select>
 
+    <select id="selectTraitByTraitNameWithoutDeleted" parameterType="Trait" resultMap="TraitResult">
+        <include refid="selectTraitVo"/>
+        where trait_name = #{name}
+    </select>
+
     <insert id="insertTrait" parameterType="Trait" useGeneratedKeys="true" keyProperty="traitId">
         insert into trait
         <trim prefix="(" suffix=")" suffixOverrides=",">

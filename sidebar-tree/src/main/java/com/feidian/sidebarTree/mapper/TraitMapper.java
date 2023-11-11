@@ -76,4 +76,6 @@ public interface TraitMapper
 
     //查询性状Id、性状名称、性状类型id、性状类型名称
     List<TraitTypeVO> selectTraitAndTraitTypeList();
+
+    Trait selectTraitByTraitNameWithoutDeleted(String name);
 }
