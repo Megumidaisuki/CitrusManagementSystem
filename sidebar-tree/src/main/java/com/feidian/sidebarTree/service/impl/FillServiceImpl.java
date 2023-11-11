@@ -582,6 +582,7 @@ public class FillServiceImpl implements FillService {
     public AjaxResult getAllDocumentNum(int treeType, String startDate, String endDate) throws ParseException {
         String formatStartDate = formatDate(startDate);
         String formatEndDate = formatDate(endDate);
+        //统计叶子节点
         List<SidebarTree> trees = pictureService.selectAllNodeMessage(treeType);
         List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
         Map<String,Map<String,Long>> allList = new HashMap<>();
