@@ -18,8 +18,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="treeName" column="tree_name"/>
         <result property="treeId" column="tree_id"/>
     </resultMap>
-    <resultMap id="SiderTreeMapTWO" type="java.util.Map">
-        <result property="createTime" column="create_time"/>
+    <resultMap id="DocumentMap" type="com.feidian.sidebarTree.domain.vo.DocumentNumVO">
+        <result column="DateTime" property="createTime"/>
+        <result column="Counts" property="count"/>
     </resultMap>
 
     <sql id="selectTreePictureVo">
@@ -49,7 +50,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectTreePictureCountByTreeId" resultType="java.lang.Integer">
-        select count(*) from tree_picture tp where (tree_id in (select tree_id from sidebar_tree where parent_id = #{treeId})) or tree_id = #{treeId}
+        select count(*) from tree_picture tp where tree_id = #{treeId}
     </select>
     <select id="selectPictureUrlById" resultType="java.lang.String">
         select picture_url from tree_picture where picture_id = #{pictureId}
@@ -57,8 +58,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectNodeMessage" resultMap = "SidebarTreeMap">
         select tree_name,tree_id from sidebar_tree where parent_id = #{treeId}
     </select>
-    <select id="selectTreePictureCountByTreeIdAndTime" resultType="java.util.Map" >
-        select DATE(create_time),count(*)
+    <select id="selectTreePictureCountByTreeIdAndTime" resultMap="DocumentMap">
+        select DATE(create_time) DateTime,count(*) Counts
         from citrus.phenotype_file
         where tree_id = #{treeId}
           and create_time between #{startDate} and #{endDate}
@@ -66,12 +67,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by DATE(create_time);
 
     </select>
-    <select id="selectAllNodeMessage" resultType="com.feidian.sidebarTree.domain.SidebarTree">
-        select tree_name, tree_id
+    <select id="selectAllNodeMessage" resultMap= "SidebarTreeMap">
+        select tree_id, tree_name
         from citrus.sidebar_tree
         where parent_id in (select tree_id
-                            from sidebar_tree
-                            where parent_id in (select tree_id from sidebar_tree where tree_type = #{treeType}));
+                            from citrus.sidebar_tree
+                            where parent_id in (select tree_id
+                                                from citrus.sidebar_tree
+                                                where parent_id in (select tree_id
+                                                                    from citrus.sidebar_tree
+                                                                    where tree_type = #{treeType} and parent_id = 0)))
+UNION ALL
+        select tree_id,tree_name
+        from citrus.sidebar_tree
+        where parent_id in (select tree_id
+                            from citrus.sidebar_tree
+                            where parent_id in (select tree_id
+                                                from citrus.sidebar_tree
+                                                where tree_type = #{treeType} and parent_id = 0))
+        UNION ALL
+        select tree_id,tree_name
+        from citrus.sidebar_tree
+        where parent_id in (select tree_id
+                            from citrus.sidebar_tree
+                            where tree_type = #{treeType} and parent_id = 0)
+        UNION ALL
+        select tree_id,tree_name
+        from citrus.sidebar_tree
+        where tree_type = #{treeType} and parent_id = 0;
+
 
     </select>
 

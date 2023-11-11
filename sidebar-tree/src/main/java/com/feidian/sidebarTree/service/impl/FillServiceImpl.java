@@ -6,6 +6,7 @@ import com.feidian.common.core.domain.AjaxResult;
 import com.feidian.sidebarTree.domain.SidebarTree;
 import com.feidian.sidebarTree.domain.TreeFile;
 import com.feidian.sidebarTree.domain.TreePicture;
+import com.feidian.sidebarTree.domain.vo.DocumentNumVO;
 import com.feidian.sidebarTree.domain.vo.SidebarTreeVO;
 import com.feidian.sidebarTree.mapper.TreeFileMapper;
 import com.feidian.sidebarTree.mapper.TreePictureMapper;
@@ -558,15 +559,13 @@ public class FillServiceImpl implements FillService {
         List<SidebarTree> trees = pictureService.selectNodeMessage(treeId);
         List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
         Map<String, Map<String, Long>> allList = new HashMap<>();
-        HashMap<String, Long> test = new HashMap<String, Long>();
-        test.put("test",0L);
         for (SidebarTreeVO sidebarTreeVO : sidebarTreeVOS) {
             Long treeId1 = sidebarTreeVO.getTreeId();
-            Map<String, Long> map = pictureService.selectTreePictureCountByTreeIdAndTime(treeId1, formatStartDate, formatEndDate);
-            if(map == null){
-                map = test;
-            }
-            allList.put(sidebarTreeVO.getTreeName(), map);
+            List<DocumentNumVO> map = pictureService.selectTreePictureCountByTreeIdAndTime(treeId1, formatStartDate, formatEndDate);
+            Map<String, Long> mapList = new HashMap<>();
+            map.stream().forEach(e -> mapList.put(e.getCreateTime(),e.getCount()));
+
+            allList.put(sidebarTreeVO.getTreeName(), mapList);
         }
         //对集合处理，使前端更好操作
         Map<String, List<Long>> setList = new HashMap<>();
@@ -583,19 +582,22 @@ public class FillServiceImpl implements FillService {
     public AjaxResult getAllDocumentNum(int treeType, String startDate, String endDate) throws ParseException {
         String formatStartDate = formatDate(startDate);
         String formatEndDate = formatDate(endDate);
+        //统计叶子节点
         List<SidebarTree> trees = pictureService.selectAllNodeMessage(treeType);
         List<SidebarTreeVO> sidebarTreeVOS = BeanCopyUtils.copyProperties(trees, SidebarTreeVO.class);
         Map<String,Map<String,Long>> allList = new HashMap<>();
         for(SidebarTreeVO sidebarTreeVO:sidebarTreeVOS){
-            Map<String, Long> map = pictureService.selectTreePictureCountByTreeIdAndTime(sidebarTreeVO.getTreeId(), formatStartDate, formatEndDate);
-            allList.put(sidebarTreeVO.getTreeName(),map);
+            Map<String, Long> mapList = new HashMap<>();
+            List<DocumentNumVO> map = pictureService.selectTreePictureCountByTreeIdAndTime(sidebarTreeVO.getTreeId(), formatStartDate, formatEndDate);
+            map.stream().forEach(e -> mapList.put(e.getCreateTime(),e.getCount()));
+            allList.put(sidebarTreeVO.getTreeName(),mapList);
         }
         //对集合处理，使前端更好操作
         Map<String,List<Long>> setList = new HashMap<>();
         Set<Map.Entry<String, Map<String, Long>>> entries = allList.entrySet();
         for (Map.Entry<String, Map<String, Long>> entry : entries) {
             Map<String, Long> value = entry.getValue();
-            List<Long> fileList = getFileList(value, startDate, endDate);
+            List<Long> fileList = getFileList(value, formatStartDate, formatEndDate);
             setList.put(entry.getKey(),fileList);
         }
         return AjaxResult.success(setList);

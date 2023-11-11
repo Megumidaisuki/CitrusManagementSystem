@@ -2,6 +2,7 @@ package com.feidian.sidebarTree.mapper;
 
 import com.feidian.sidebarTree.domain.SidebarTree;
 import com.feidian.sidebarTree.domain.TreePicture;
+import com.feidian.sidebarTree.domain.vo.DocumentNumVO;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -74,7 +75,7 @@ public interface TreePictureMapper {
 
     List<SidebarTree> selectNodeMessage(int treeId);
 
-    Map<String, Long> selectTreePictureCountByTreeIdAndTime(@Param("treeId") Long treeId, @Param("startDate") String startDate, @Param("endDate") String endDate);
+    List<DocumentNumVO> selectTreePictureCountByTreeIdAndTime(@Param("treeId") Long treeId, @Param("startDate") String startDate, @Param("endDate") String endDate);
 
-    List<SidebarTree> selectAllNodeMessage(int treeType);
+    List<SidebarTree> selectAllNodeMessage(@Param("treeType") int treeType);
 }
