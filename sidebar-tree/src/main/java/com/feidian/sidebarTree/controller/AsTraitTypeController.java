@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.feidian.common.utils.ServletUtils;
 import com.feidian.sidebarTree.domain.AsTypeUse;
 import com.feidian.sidebarTree.domain.Trait;
 import com.feidian.sidebarTree.service.ITraitTypeService;
+import com.github.pagehelper.PageInfo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,9 @@ import com.feidian.sidebarTree.domain.AsTraitType;
 import com.feidian.sidebarTree.service.IAsTraitTypeService;
 import com.feidian.common.utils.poi.ExcelUtil;
 import com.feidian.common.core.page.TableDataInfo;
+
+import static com.feidian.common.core.page.TableSupport.PAGE_NUM;
+import static com.feidian.common.core.page.TableSupport.PAGE_SIZE;
 
 /**
  * 【请填写功能名称】Controller
@@ -117,6 +122,8 @@ public class AsTraitTypeController extends BaseController
     public TableDataInfo selectHighlight(String type, String name) {
         startPage();
         List<Trait> list = asTraitTypeService.selectHighlight(type, name);
+
+
         return getDataTable(list);
     }
 
@@ -126,6 +133,9 @@ public class AsTraitTypeController extends BaseController
     public AjaxResult selectHighlightin(String type, String name) {
         startPage();
         List<Trait> a = asTraitTypeService.selectHighlightin(type, name);
+        String pageNum = ServletUtils.getParameter(PAGE_NUM);
+        String pageSize = ServletUtils.getParameter(PAGE_SIZE);
+
         System.out.println(a.size());
         return AjaxResult.success(a.size());
     }

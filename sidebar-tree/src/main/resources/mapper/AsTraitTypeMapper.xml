@@ -49,13 +49,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         T.update_by,
                         T.update_time,
                         T.remark
-        from as_trait_type AT,
-             trait_type TT,
-             trait T
-        where
-           AT.trait_type_id = TT.trait_type_id
-          and AT.trait_id = T.trait_id
-          and ((TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
+#         from citrus.as_trait_type AT,
+#              citrus.trait_type TT,
+#              citrus.trait T
+#         where
+#            AT.trait_type_id = TT.trait_type_id
+#           and AT.trait_id = T.trait_id and
+        FROM
+            citrus.trait T
+                left join
+            citrus.as_trait_type AT ON AT.trait_id = T.trait_id
+                left join
+            citrus.trait_type TT ON AT.trait_type_id = TT.trait_type_id
+                where
+          ((TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
                 T.trait_name like concat('%', #{name}, '%') and #{name} != '' and #{name} is not null)
             or ((#{type} = '' or #{type} is null) and T.trait_name like concat('%', #{name}, '%') and
                 #{name} != '' and #{name} is not null)
@@ -104,14 +111,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         T.update_by,
                         T.update_time,
                         T.remark
-        from as_trait_type AT,
-             trait_type TT,
-             trait T
+#         from as_trait_type AT,
+#              trait_type TT,
+#              trait T
+#         where
+#            AT.trait_type_id = TT.trait_type_id
+#           and AT.trait_id = T.trait_id and
+#
+            FROM
+            citrus.trait T
+            left join
+            citrus.as_trait_type AT ON AT.trait_id = T.trait_id
+            left join
+            citrus.trait_type TT ON AT.trait_type_id = TT.trait_type_id
         where
-           AT.trait_type_id = TT.trait_type_id
-          and AT.trait_id = T.trait_id
 
-          and ((TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
+              ((TT.trait_type_name like concat('%', #{type}, '%') and #{type} != '' and #{type} is not null and
                 T.trait_name like concat('%', #{name}, '%') and #{name} != '' and #{name} is not null)
             or ((#{type} = '' or #{type} is null) and T.trait_name like concat('%', #{name}, '%') and
                 #{name} != '' and #{name} is not null)
