@@ -144,10 +144,10 @@ public class PhenotypeFileController extends BaseController
     //该接口多传一个参数pointStatus，若为1则代表普通上传，若为0则代表大文件上传
     public AjaxResult upload(Long treeId, @RequestParam("file") MultipartFile file, int status, String remark, String fileName,int pointStatus,@RequestParam(required = false) String filePath)throws Exception {
         String tableName;
-        if(filePath == null){
-            tableName = phenotypeFileService.uploadFile(treeId, file, status, remark, fileName,pointStatus);
-        }else {
+        if(filePath != null && !filePath.isEmpty()){
             tableName = phenotypeFileService.uploadFile(treeId, file, status, remark, fileName,pointStatus,filePath);
+        }else {
+            tableName = phenotypeFileService.uploadFile(treeId, file, status, remark, fileName,pointStatus);
         }
 
         if(!StringUtils.isEmpty(tableName)){
