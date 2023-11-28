@@ -25,6 +25,7 @@ import com.feidian.common.utils.StringUtils;
 import com.feidian.common.utils.sql.SqlUtil;
 import com.feidian.sidebarTree.domain.Material;
 import com.feidian.sidebarTree.domain.PCA;
+import com.feidian.sidebarTree.domain.vo.TraitWithTypeVO;
 import com.feidian.sidebarTree.pythonCode.PythonUse;
 import com.feidian.sidebarTree.domain.Trait;
 import com.feidian.sidebarTree.domain.vo.AreaVO;
@@ -260,10 +261,10 @@ public class PhenotypeFileController extends BaseController
 
     /*获取性状详细数据*/
     @Log(title = "表型文件", businessType = BusinessType.GRANT)
-    @GetMapping("selectTraitColByFileId/{fileId}")
+    @GetMapping("/selectTraitColByFileId/{fileId}")
     public AjaxResult selectTraitColByFileId(@PathVariable Long fileId)
     {
-        List<Trait> list = phenotypeFileService.selectTraitColByFileId(fileId);
+        List<TraitWithTypeVO> list = phenotypeFileService.selectTraitColByFileId(fileId);
         return  AjaxResult.success(list);
     }
 

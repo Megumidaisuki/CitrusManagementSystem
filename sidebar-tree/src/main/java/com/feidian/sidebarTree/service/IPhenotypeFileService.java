@@ -4,6 +4,7 @@ import com.feidian.common.exception.ServiceException;
 import com.feidian.sidebarTree.domain.Material;
 import com.feidian.sidebarTree.domain.PhenotypeFile;
 import com.feidian.sidebarTree.domain.Trait;
+import com.feidian.sidebarTree.domain.vo.TraitWithTypeVO;
 import org.springframework.stereotype.Service;
 import com.feidian.sidebarTree.domain.vo.PhenotypeDetailVO;
 import com.feidian.sidebarTree.domain.vo.PhenotypeFileVO;
@@ -103,7 +104,7 @@ public interface IPhenotypeFileService {
 
     boolean mergeFile(MultipartFile file, String tableName, String remark, String fileName) throws IOException;
 
-    List<Trait> selectTraitColByFileId(Long fileId);
+    List<TraitWithTypeVO> selectTraitColByFileId(Long fileId);
 
     Set<String> getMaterialIdByFileId(Long fileId);
 

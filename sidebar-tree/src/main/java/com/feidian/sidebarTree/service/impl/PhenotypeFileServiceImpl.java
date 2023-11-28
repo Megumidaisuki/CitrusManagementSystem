@@ -13,6 +13,7 @@ import com.feidian.sidebarTree.domain.Trait;
 import com.feidian.sidebarTree.domain.*;
 import com.feidian.sidebarTree.domain.vo.PhenotypeDetailVO;
 import com.feidian.sidebarTree.domain.vo.PhenotypeFileVO;
+import com.feidian.sidebarTree.domain.vo.TraitWithTypeVO;
 import com.feidian.sidebarTree.mapper.*;
 import com.feidian.sidebarTree.service.IPhenotypeFileService;
 import com.feidian.sidebarTree.service.ITraitService;
@@ -982,37 +983,38 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     }
 
                 }
+
+                HashMap<Long, Trait> traitsMapReverse = infoUtil.getTraitsObjectMapReverse();
+                //HashMap<Long,TraitType> traitTypeMap = infoUtil.getTraitTypeMap();
                 //通过id到形状表里查
                 for (String id : ids) {
                     HashMap<String, String> map = result.get(id);
-                    HashMap<Long, Trait> traitsMapReverse = infoUtil.getTraitsObjectMapReverse();
-                    HashMap<Long,TraitType> traitTypeMap = infoUtil.getTraitTypeMap();
 
                     String id2 = map.get("traitId");
                     if (id2 != null) {
                         Long id1 = Long.valueOf(id2);
                         Trait trait = traitsMapReverse.get(id1);
-                        TraitType traitType = traitTypeMap.get(id1);
+                        //TraitType traitType = traitTypeMap.get(id1);
 
                         if (trait == null) continue;
-                        if (traitType == null) continue;
+                        //if (traitType == null) continue;
 
                         String traitName1 = trait.getTraitName();
                         map.put("traitName", traitName1);
                         String fullName = trait.getFullName();
                         map.put("fullName", fullName);
 
-                        Long traitTypeId = traitType.getTraitTypeId();
-                        if (traitTypeId != null)
-                            map.put("traitTypeId", traitTypeId.toString());
-                        else
-                            map.put("traitTypeId", null);
-
-                        String traitTypeName = traitType.getTraitTypeName();
-                        if (traitTypeName != null)
-                            map.put("traitTypeName", traitTypeName.toString());
-                        else
-                            map.put("traitTypeName", null);
+//                        Long traitTypeId = traitType.getTraitTypeId();
+//                        if (traitTypeId != null)
+//                            map.put("traitTypeId", traitTypeId.toString());
+//                        else
+//                            map.put("traitTypeId", null);
+//
+//                        String traitTypeName = traitType.getTraitTypeName();
+//                        if (traitTypeName != null)
+//                            map.put("traitTypeName", traitTypeName.toString());
+//                        else
+//                           map.put("traitTypeName", null);
 
                         String abbreviationName = trait.getAbbreviationName();
                         if (abbreviationName != null)
@@ -1031,8 +1033,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         String fullName = null;
                         map.put("fullName", fullName);
 
-                        map.put("traitTypeId", null);
-                        map.put("traitTypeName", null);
+//                        map.put("traitTypeId", null);
+//                        map.put("traitTypeName", null);
                         map.put("abbreviationName", null);
 
                         String remark = null;
@@ -1093,11 +1095,12 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
     }*/
 
     @Override
-    public List<Trait> selectTraitColByFileId(Long fileId) {
-        List<Trait> list =new ArrayList<>();
+    public List<TraitWithTypeVO> selectTraitColByFileId(Long fileId) {
+        List<TraitWithTypeVO> list =new ArrayList<>();
         PhenotypeFile file = phenotypeFileMapper.selectPhenotypeFileByFileId(fileId);
         String tableName = file.getTableName();
         List<Map<String, Object>> mapslist = phenotypeFileMapper.selectAllColumns(tableName);
+        HashMap<Long, TraitType> traitTypeMap = infoUtil.getTraitTypeMap();
         if(mapslist!=null&&mapslist.size()!=0)
         {
             Map<String, Object> map = mapslist.get(0);
@@ -1105,15 +1108,25 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 String key = entry.getKey();
                 Object value = entry.getValue();
                 if(key.contains("trait_id")){
+                    TraitWithTypeVO traitWithTypeVO = new TraitWithTypeVO();
                     Trait trait = traitMapper.selectTraitByTraitIdWithoutDeleted(Long.valueOf(value.toString()));
-                    if(trait!=null){
-                        list.add(trait);
+                    TraitType traitType = traitTypeMap.get(trait.getTraitId());
+                    if (trait!=null){
+                        traitWithTypeVO.setTraitId(trait.getTraitId());
+                        traitWithTypeVO.setTraitName(trait.getTraitName());
+                        traitWithTypeVO.setFullName(trait.getFullName());
+                        traitWithTypeVO.setAbbreviationName(trait.getAbbreviationName());
+                        traitWithTypeVO.setIsdeleted(trait.getIsdeleted());
+                        if(traitType != null){
+                            traitWithTypeVO.setTraitTypeId(traitType.getTraitTypeId());
+                            traitWithTypeVO.setTraitTypeName(traitType.getTraitTypeName());
+                        }
+                        list.add(traitWithTypeVO);
                     }
+
                 }
             }
         }
-
-
         return list;
     }
 
