@@ -9,7 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = com.feidian.YuZhongApplication.class)
+@SpringBootTest(classes = com.feidian.CitrusApplication.class)
 public class simpleTest {
 
     @Autowired
