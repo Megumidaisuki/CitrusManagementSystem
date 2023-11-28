@@ -986,21 +986,40 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                 for (String id : ids) {
                     HashMap<String, String> map = result.get(id);
                     HashMap<Long, Trait> traitsMapReverse = infoUtil.getTraitsObjectMapReverse();
+                    HashMap<Long,TraitType> traitTypeMap = infoUtil.getTraitTypeMap();
+
                     String id2 = map.get("traitId");
                     if (id2 != null) {
                         Long id1 = Long.valueOf(id2);
                         Trait trait = traitsMapReverse.get(id1);
+                        TraitType traitType = traitTypeMap.get(id1);
+
                         if (trait == null) continue;
+                        if (traitType == null) continue;
+
                         String traitName1 = trait.getTraitName();
                         map.put("traitName", traitName1);
                         String fullName = trait.getFullName();
                         map.put("fullName", fullName);
+
+                        Long traitTypeId = traitType.getTraitTypeId();
+                        if (traitTypeId != null)
+                            map.put("traitTypeId", traitTypeId.toString());
+                        else
+                            map.put("traitTypeId", null);
+
+                        String traitTypeName = traitType.getTraitTypeName();
+                        if (traitTypeName != null)
+                            map.put("traitTypeName", traitTypeName.toString());
+                        else
+                            map.put("traitTypeName", null);
 
                         String abbreviationName = trait.getAbbreviationName();
                         if (abbreviationName != null)
                             map.put("abbreviationName", abbreviationName.toString());
                         else
                             map.put("abbreviationName", null);
+
                         String remark = trait.getRemark();
                         map.put("remark", remark);
                         result.put(id, map);
@@ -1012,6 +1031,8 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         String fullName = null;
                         map.put("fullName", fullName);
 
+                        map.put("traitTypeId", null);
+                        map.put("traitTypeName", null);
                         map.put("abbreviationName", null);
 
                         String remark = null;

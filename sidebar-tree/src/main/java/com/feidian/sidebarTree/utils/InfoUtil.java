@@ -26,6 +26,8 @@ public class InfoUtil{
 
     private HashMap<Long,Trait> traitsMapObjectReverse = null;
 
+    private HashMap<Long, TraitType> traitTypeMap = null;
+
 
     @Autowired
     private TraitMapper traitMapper;
@@ -78,6 +80,7 @@ public class InfoUtil{
         for (TraitTypeVO trait : traitTypeList) {
             traitsMap.put(trait.getTraitId(),new TraitType(trait.getTraitTypeId(),trait.getTraitTypeName()));
         }
-        return traitsMap;
+        this.traitTypeMap = traitsMap;
+        return traitTypeMap;
     }
 }

@@ -192,7 +192,7 @@ public class PhenotypeFileController extends BaseController
 
     /*获取性状数据*/
     @Log(title = "表型文件", businessType = BusinessType.GRANT)
-    @GetMapping("selectTraitByFileId/{fileId}")
+    @GetMapping("/selectTraitByFileId/{fileId}")
     public AjaxResult selectTraitByFileId(@PathVariable Long fileId,int pageSize,int pageNum)
     {
         AjaxResult result = new AjaxResult();
