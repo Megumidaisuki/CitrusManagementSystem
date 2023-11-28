@@ -14,12 +14,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 @EnableCaching
 @EnableAsync
-public class YuZhongApplication
+public class CitrusApplication
 {
     public static void main(String[] args)
     {
         // System.setProperty("spring.devtools.restart.enabled", "false");
-        SpringApplication.run(YuZhongApplication.class, args);
+        SpringApplication.run(CitrusApplication.class, args);
         System.out.println("(♥◠‿◠)ﾉﾞ  系统启动成功   ლ(´ڡ`ლ)ﾞ  \n");
     }
 }

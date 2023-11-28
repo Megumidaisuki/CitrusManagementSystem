@@ -13,6 +13,6 @@ public class FeiDianServletInitializer extends SpringBootServletInitializer
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
     {
-        return application.sources(YuZhongApplication.class);
+        return application.sources(CitrusApplication.class);
     }
 }
