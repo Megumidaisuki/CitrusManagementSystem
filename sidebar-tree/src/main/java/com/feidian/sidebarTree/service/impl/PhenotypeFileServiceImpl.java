@@ -225,6 +225,21 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         headers = csvReader.getRawRecord().split(",");
                     }
                     else throw new ServiceException("缺少表头信息");
+
+                    //数据入库
+                    //拼接表头
+                    List<String[]> data = CsvUtils.read(filePath);
+                    //数据规范性检测
+                    Set<Object> set = new HashSet<>();
+                    for (int i = 1; i < data.size(); i++) {
+                        String element = data.get(i)[0];
+                        if (!set.add(element)) {
+                            // 如果元素已存在于集合中，说明有重复，返回false
+                            return "数据不符合规范，含重复材料名称";
+                        }
+                    }
+
+
                     /*//首行数据，拿到物种id，群体id，年份，位置,设置给表型文件
                     if (csvReader.readRecord()) {
                         r1 = csvReader.getRawRecord().split(",");
@@ -259,9 +274,6 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     // 执行建表语句
                     excuteMapper.excute(createSql);
 
-                    //数据入库
-                    //拼接表头
-                    List<String[]> data = CsvUtils.read(filePath);
                     StringBuilder insertSQLBuilder = new StringBuilder("INSERT INTO " + phenotypeFile.getTableName() +
                             "(phenotype_id,material_id,create_by,create_time,update_by,update_time,remark");
                     traitId = 0;
@@ -348,6 +360,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
             } else return null;
         } else return null;
     }
+
     @Transactional
     @Override
     public String uploadFile(Long treeId, MultipartFile file, int fileStatus, String remark, String fileName,int pointStatus,String filePath) throws ServiceException, IOException {
@@ -405,6 +418,19 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                         headers = csvReader.getRawRecord().split(",");
                     }
                     else throw new ServiceException("缺少表头信息");
+
+                    //数据入库
+                    //拼接表头
+                    List<String[]> data = CsvUtils.read(filePath);
+                    //数据规范性检测
+                    Set<Object> set = new HashSet<>();
+                    for (int i = 1; i < data.size(); i++) {
+                        String element = data.get(i)[0];
+                        if (!set.add(element)) {
+                            // 如果元素已存在于集合中，说明有重复，返回false
+                            return "数据不符合规范，含重复材料名称";
+                        }
+                    }
                     /*//首行数据，拿到物种id，群体id，年份，位置,设置给表型文件
                     if (csvReader.readRecord()) {
                         r1 = csvReader.getRawRecord().split(",");
@@ -439,9 +465,7 @@ public class PhenotypeFileServiceImpl implements IPhenotypeFileService
                     // 执行建表语句
                     excuteMapper.excute(createSql);
 
-                    //数据入库
-                    //拼接表头
-                    List<String[]> data = CsvUtils.read(filePath);
+
                     StringBuilder insertSQLBuilder = new StringBuilder("INSERT INTO " + phenotypeFile.getTableName() +
                             "(phenotype_id,material_id,create_by,create_time,update_by,update_time,remark");
                     traitId = 0;

@@ -150,7 +150,9 @@ public class PhenotypeFileController extends BaseController
         }else {
             tableName = phenotypeFileService.uploadFile(treeId, file, status, remark, fileName,pointStatus);
         }
-
+        if ("数据不符合规范，含重复材料名称".equals(tableName)){
+            return  AjaxResult.error("上传失败,数据不符合规范，含重复材料名称");
+        }
         if(!StringUtils.isEmpty(tableName)){
             phenotypeFileService.waitUpdate(tableName);
             return AjaxResult.success("上传成功");
