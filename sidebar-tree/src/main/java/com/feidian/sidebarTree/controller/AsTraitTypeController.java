@@ -179,5 +179,24 @@ public class AsTraitTypeController extends BaseController
         return AjaxResult.success(a);
     }
 
+    //1.7 多表查询 返回需要高亮的数据 大查询
+    //@PreAuthorize("@ss.hasPermi('system:type:list')")
+    @PostMapping("/selectHighlightAll")
+    public TableDataInfo selectHighlightAll(String type, String name) {
+        startPage();
+        List<Trait> list = asTraitTypeService.selectHighlight(type, name);
+        return getDataTable(list);
+    }
+
+    //1.7 查询高亮的条数
+    //@PreAuthorize("@ss.hasPermi('system:type:list')")
+    @GetMapping("/selectHighlightinAll")
+    public AjaxResult selectHighlightinAll(String type, String name) {
+        startPage();
+        List<Trait> a = asTraitTypeService.selectHighlightin(type, name);
+        System.out.println(a.size());
+        return AjaxResult.success(a.size());
+    }
+
 
 }
